@@ -1,9 +1,9 @@
 ﻿using System;
 using OpenQA.Selenium.PhantomJS;
 
-namespace WebApi.Code
+namespace HtmlScraper.Code
 {
-    public class HtmlScraper
+    public class Scraper
     {
         public static string GetHtml(string url, string htmlElementToFind = null)
         {

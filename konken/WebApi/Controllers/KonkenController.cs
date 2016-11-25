@@ -6,7 +6,9 @@ using System.Web.Http;
 using Common.Models;
 using Polly;
 using Microsoft.Azure; // Namespace for CloudConfigurationManager
-using Microsoft.WindowsAzure.Storage; // Namespace for CloudStorageAccount
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Queue;
+// Namespace for CloudStorageAccount
 using Microsoft.WindowsAzure.Storage.Table;
 using WebApi.Controllers;
 using WebApi.Models;
@@ -17,13 +19,8 @@ namespace WebRole1.Controllers
 {
     public class KonkenController : BaseApiController
     {
-        private readonly Policy _policy = Policy
-            .Handle<Exception>()
-            .WaitAndRetry(10, retryAttempt =>
-                TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))
-            );
-
         private CloudTable Table { get; set; }
+        private CloudQueue Queue { get; set; }
 
         public KonkenController()
         {
@@ -38,12 +35,26 @@ namespace WebRole1.Controllers
 
             // Create the table client.
             CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
-
             // Retrieve a reference to the table.
             Table = tableClient.GetTableReference("konken");
-
             // Create the table if it doesn't exist.
             Table.CreateIfNotExists();
+
+            // Create the queue client
+            CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
+            // Retrieve a reference to the queue
+            Queue = queueClient.GetQueueReference("konkenQueue");
+            // Create the queue if it doesn't exist
+            Queue.CreateIfNotExists();
+        }
+
+        [HttpGet, Route("scrapeleague")]
+        public async Task<IHttpActionResult> ScrapeLeagueHtml(string fplLeagueId)
+        {
+            var queueMessage = new CloudQueueMessage(fplLeagueId);
+            await Queue.AddMessageAsync(queueMessage);
+
+            return Ok();
         }
 
         [HttpGet, Route("getleague")]

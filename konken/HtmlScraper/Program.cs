@@ -16,7 +16,7 @@ namespace HtmlScraper
 
             var config = new JobHostConfiguration(CloudConfigurationManager.GetSetting("StorageConnectionString"));
             
-            config.UseTimers();
+            //config.UseTimers();
 #if DEBUG
             //config.Tracing.ConsoleLevel = TraceLevel.Info;
             //config.Queues.MaxPollingInterval = TimeSpan.FromSeconds(5);
