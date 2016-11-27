@@ -6,6 +6,7 @@ using Common.Code;
 using Common.Models;
 using Microsoft.Azure.WebJobs;
 using HtmlScraper.Code;
+using Microsoft.Azure;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Queue;
 using Newtonsoft.Json;
