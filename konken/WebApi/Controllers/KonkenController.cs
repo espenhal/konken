@@ -4,18 +4,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Common.Models;
-using Polly;
-using Microsoft.Azure; // Namespace for CloudConfigurationManager
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Queue;
-// Namespace for CloudStorageAccount
 using Microsoft.WindowsAzure.Storage.Table;
-using WebApi.Controllers;
+using Newtonsoft.Json;
 using WebApi.Models;
 
-// Namespace for Table storage types
-
-namespace WebRole1.Controllers
+namespace WebApi.Controllers
 {
     public class KonkenController : BaseApiController
     {
@@ -36,29 +31,29 @@ namespace WebRole1.Controllers
             // Create the table client.
             CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
             // Retrieve a reference to the table.
-            Table = tableClient.GetTableReference("konken");
+            Table = tableClient.GetTableReference("konkentable");
             // Create the table if it doesn't exist.
             Table.CreateIfNotExists();
 
             // Create the queue client
             CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
             // Retrieve a reference to the queue
-            Queue = queueClient.GetQueueReference("konkenQueue");
+            Queue = queueClient.GetQueueReference("konkenqueue");
             // Create the queue if it doesn't exist
             Queue.CreateIfNotExists();
         }
 
         [HttpGet, Route("scrapeleague")]
-        public async Task<IHttpActionResult> ScrapeLeagueHtml(string fplLeagueId)
+        public async Task<IHttpActionResult> ScrapeLeague(string fplLeagueId)
         {
-            var queueMessage = new CloudQueueMessage(fplLeagueId);
+            var queueMessage = new CloudQueueMessage(JsonConvert.SerializeObject(new UpdateLeagueMessage {FplLeagueId = fplLeagueId}));
             await Queue.AddMessageAsync(queueMessage);
 
             return Ok();
         }
 
         [HttpGet, Route("getleague")]
-        public async Task<IHttpActionResult> GetLeague(string fplLeagueId)
+        public async Task<IHttpActionResult> Get(string fplLeagueId)
         {
             TableOperation retrieveLeagueOperation = TableOperation.Retrieve<LeagueEntity>("League", fplLeagueId);
 
@@ -66,31 +61,41 @@ namespace WebRole1.Controllers
 
             League league = Mapper.Map<LeagueEntity, League>((LeagueEntity)retrieveLeagueResult.Result);
 
-            TableQuery<PlayerEntity> playerTableQuery =
-                new TableQuery<PlayerEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, "Player"));
+            if (league == null)
+                return NotFound();
 
-            TableQuerySegment<PlayerEntity> playerEntities = await Table.ExecuteQuerySegmentedAsync(playerTableQuery, new TableContinuationToken());
+            try
+            {
+                TableQuery<PlayerEntity> playerTableQuery =
+                    new TableQuery<PlayerEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, "Player"));
 
-            TableQuery<GameweekEntity> gameweekTableQuery =
+                TableQuerySegment<PlayerEntity> playerEntities = await Table.ExecuteQuerySegmentedAsync(playerTableQuery, new TableContinuationToken());
+
+                TableQuery<GameweekEntity> gameweekTableQuery =
                     new TableQuery<GameweekEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, "Gameweek"));
 
-            TableQuerySegment<GameweekEntity> gameweeksEntities = await Table.ExecuteQuerySegmentedAsync(gameweekTableQuery, new TableContinuationToken());
+                TableQuerySegment<GameweekEntity> gameweeksEntities = await Table.ExecuteQuerySegmentedAsync(gameweekTableQuery, new TableContinuationToken());
 
-            league.Players = Mapper.Map<IList<PlayerEntity>, IList<Player>>(playerEntities.Results);
+                league.Players = Mapper.Map<IList<PlayerEntity>, IList<Player>>(playerEntities.Results);
 
-            foreach (var player in league.Players)
-            {
-                player.Gameweeks =
-                    Mapper.Map<IList<GameweekEntity>, IList<Gameweek>>(
-                        gameweeksEntities.Results.Where(
-                            x => x.FplLeagueId == fplLeagueId && x.FplPlayerId == player.FplPlayerId).ToList());
+                foreach (var player in league.Players)
+                {
+                    player.Gameweeks =
+                        Mapper.Map<IList<GameweekEntity>, IList<Gameweek>>(
+                            gameweeksEntities.Results.Where(
+                                x => x.FplLeagueId == fplLeagueId && x.FplPlayerId == player.FplPlayerId).ToList());
+                }
+
+                return Ok(league);
             }
-
-            return Ok(league);
+            catch (Exception e)
+            {
+                return InternalServerError(e);
+            }
         }
 
-        [HttpPut, Route("updateleague")]
-        public async Task<IHttpActionResult> PutLeague(League league)
+        [HttpPost, Route("updateleague")]
+        public async Task<IHttpActionResult> Post(League league)
         {
             // League
             LeagueEntity leagueEntity = Mapper.Map<League, LeagueEntity>(league);
@@ -132,201 +137,5 @@ namespace WebRole1.Controllers
 
             return Ok();
         }
-
-        //[HttpPost, Route("createleague")]
-        //public async Task<IHttpActionResult> PostLeague(League league)
-        //{
-        //    TableBatchOperation batchOperation = new TableBatchOperation();
-
-        //    foreach (var player in league.Players)
-        //    {
-        //        PlayerEntity entity = Mapper.Map<Player, PlayerEntity>(player);
-        //        entity.PartitionKey = league.FplLeagueId;
-
-        //        batchOperation.Insert(entity);
-        //    }
-
-        //    IList<TableResult> restult = await Table.ExecuteBatchAsync(batchOperation);
-
-        //    return Ok();
-        //}
-
-        //[HttpPost, Route("updateleague")]
-        //public League PutLeague(League league)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //[HttpPost, Route("createLeague")]
-        //public League PostLeague(League league)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //[HttpPost, Route("createPlayer")]
-        //public Player PostPlayer(Player player)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //[HttpPut, Route("updateLeague")]
-        //public League PutLeague(League league)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //[HttpPut, Route("updatePlayer")]
-        //public Player PutPlayer(Player player)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-
-        //[HttpGet, Route("getleague")]
-        //public League GetLeagueHtml(string leagueId)
-        //{
-        //    //var leagueHtml =
-        //    //    _policy.Execute(
-        //    //        () =>
-        //    //            HtmlScraper.GetHtmlByXPath(
-        //    //                $"https://fantasy.premierleague.com/a/leagues/standings/{leagueId}/classic", "//*[@id=\"ismr-classic-standings\"]/div/div/table/tbody"));
-
-        //    //return leagueHtml;
-
-
-        //    throw new NotImplementedException();
-        //}
-
-        //[HttpGet, Route("getplayer")]
-        //public string GetPlayerHtml(string playerId)
-        //{
-        //    //var playerHtml =
-        //    //    _policy.Execute(
-        //    //        () =>
-        //    //            HtmlScraper.GetHtmlByXPath($"https://fantasy.premierleague.com/a/entry/{playerId}/history", "//*[@id=\"ismr-event-history\"]/div/div/div/table/tbody"));
-
-        //    //return playerHtml;
-        //    throw new NotImplementedException();
-        //}
     }
 }
-
-//private const string CacheName = "konkenfplleague";
-//private const string CacheNameUpdate = "konkenfplleagueupdate";
-//private MemoryCache _cache = MemoryCache.Default;
-
-//        // GET api/<controller>
-//        //[CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100)]
-//        public HttpResponseMessage Get()
-//        {
-//            if (_cache == null)
-//                _cache = MemoryCache.Default;
-
-//            if (_cache.Contains(CacheName))
-//            {
-//                if (_cache.Contains(CacheNameUpdate))
-//                    _cache.Remove(CacheNameUpdate);
-
-//                return Request.CreateResponse(HttpStatusCode.OK, new LeagueResponse { League = (League)_cache.Get(CacheName) });
-//            }
-
-//            if (_cache.Contains(CacheNameUpdate))
-//            {
-//                return Request.CreateResponse(HttpStatusCode.OK, new LeagueResponse { CacheUpdate = (DateTime)_cache.Get(CacheNameUpdate) });
-//            }
-
-//            _cache.Set(CacheNameUpdate, DateTime.UtcNow, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddMinutes(2) });
-
-//            try
-//            {
-//                var league = GetLeague(AppSettingsReader.FPLLeagueId);
-
-//                if (league == null)
-//                    return Request.CreateResponse(HttpStatusCode.NoContent, new LeagueResponse() { ErrorResponse = new ErrorResponse() { Message = "Unable to fecth league" } });
-
-//                _cache.Set(CacheName, league, new CacheItemPolicy { SlidingExpiration = new TimeSpan(30, 0, 0) });
-
-//                return Request.CreateResponse(HttpStatusCode.OK, new LeagueResponse { League = league });
-//            }
-//            catch (Exception e)
-//            {
-//                return Request.CreateResponse(HttpStatusCode.InternalServerError, new LeagueResponse { ErrorResponse = new ErrorResponse { Exception = e, Message = "Error fecthing league" } });
-//            }
-//            finally
-//            {
-//                if (_cache.Contains(CacheNameUpdate))
-//                    _cache.Remove(CacheNameUpdate);
-//            }
-//        }
-
-//        private League GetLeague(string leagueId)
-//        {
-//            var policy = Policy
-//                .Handle<Exception>()
-//                .WaitAndRetry(20, retryAttempt =>
-//                    TimeSpan.FromSeconds(Math.Pow(3, retryAttempt))
-//                );
-
-//            var leagueHtml =
-//                policy.Execute(
-//                    () =>
-//                        HtmlScraper.GetHtml(
-//                            $"https://fantasy.premierleague.com/a/leagues/standings/{leagueId}/classic", "ismr-main"));
-
-//            var league = HtmlParser.GetLeague(leagueHtml);
-
-//            return league;
-//        }
-
-//        private Player GetPlayer(string playerId)
-//        {
-//            var policy = Policy
-//                .Handle<Exception>()
-//                .WaitAndRetry(20, retryAttempt =>
-//                    TimeSpan.FromSeconds(Math.Pow(3, retryAttempt))
-//                );
-
-//            var playerHtml =
-//                policy.Execute(
-//                    () =>
-//                        HtmlScraper.GetHtml($"https://fantasy.premierleague.com/a/entry/{playerId}/history", "ismr-main"));
-
-
-
-//            var player.Gameweeks = policy.Execute(() => HtmlParser.GetNewGameWeekHistory(playerHtml));
-
-//            //foreach (var player in league.Players)
-//            //{
-//            //    var playerHtml = HtmlScraper.GetHtml($"https://fantasy.premierleague.com/a/entry/{player.FplPlayerId}/history", "ismr-main");
-
-//            //    player.Gameweeks = policy.Execute(() => HtmlParser.GetNewGameWeekHistory(playerHtml));
-//            //}
-
-//            //sjekke om alle spillere har like mange runder, hvis ikke kaste exception og få Polly til å kjøre en runde til
-
-//            //return league;
-//        }
-
-//        // PUT
-//        public HttpResponseMessage Put()
-//        {
-//            if (!_cache.Contains(CacheNameUpdate))
-//            {
-//                return Request.CreateResponse(HttpStatusCode.NoContent);
-//            }
-
-//            // oppdater cache
-
-//            return Request.CreateResponse(HttpStatusCode.OK);
-//        }
-
-//        // DELETE
-//        public HttpResponseMessage Delete()
-//        {
-//            _cache.Remove(CacheName);
-//            _cache.Remove(CacheNameUpdate);
-
-//            return Request.CreateResponse(HttpStatusCode.OK);
-//        }
-//    }
-//}

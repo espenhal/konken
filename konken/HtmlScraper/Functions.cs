@@ -1,8 +1,14 @@
 ﻿using System;
+using System.Configuration;
 using System.IO;
+using System.Linq;
 using Common.Code;
+using Common.Models;
 using Microsoft.Azure.WebJobs;
 using HtmlScraper.Code;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Queue;
+using Newtonsoft.Json;
 using Polly;
 
 namespace HtmlScraper
@@ -15,46 +21,60 @@ namespace HtmlScraper
                 TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))
             );
 
-        public static void ProcessQueueMessage([QueueTrigger("konkenQueue")] string message, TextWriter log)
+        private static CloudQueue Queue { get; set; }
+
+        public Functions()
         {
-            log.WriteLine($"ProcessQueueMessage {message}");
-
-            var leagueHtml =
-                _policy.Execute(
-                    () =>
-                        Scraper.GetHtmlByXPath(
-                            $"https://fantasy.premierleague.com/a/leagues/standings/{message}/classic", "//*[@id=\"ismr-classic-standings\"]/div/div/table/tbody"));
-            
-            log.WriteLine("League html fetched");
-
-            var league = HtmlParser.GetLeague(leagueHtml);
-            league.FplLeagueId = message;
-            
-
+            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
+#if DEBUG
+                "UseDevelopmentStorage=true;"
+#else
+                CloudConfigurationManager.GetSetting("StorageConnectionString")
+#endif
+                );
         }
 
-        //        public static void ProcessTimer([TimerTrigger("00:00:10", RunOnStartup = true)] TimerInfo info, [Queue("queue")] out string message, TextWriter log)
-        //        {
-        //            message = info.FormatNextOccurrences(1);
+        public static async void GetLeague([QueueTrigger("konkenqueue")] string message, TextWriter log)
+        {
+            var update = JsonConvert.DeserializeObject<UpdateLeagueMessage>(message);
 
-        //            log.WriteLine($"ProcessTimer {info.FormatNextOccurrences(1)}");
-        //#if DEBUG
-        //            Console.WriteLine($"ProcessTimer {info.FormatNextOccurrences(1)}");
-        //#endif
-        //        }
+            try
+            {
+                var leagueHtml = _policy.Execute(() =>
+                    Scraper.GetHtmlByXPath(
+                        $"https://fantasy.premierleague.com/a/leagues/standings/{update.FplLeagueId}/classic",
+                        "//*[@id=\"ismr-classic-standings\"]/div/div/table/tbody"));
 
-        //public static void ProcessStartupJob([TimerTrigger("00:00:05", RunOnStartup = true, UseMonitor = true)] TimerInfo timerInfo, TextWriter log)
-        //{
-        //    Console.WriteLine("Timer job fired!");
+                League league = HtmlParser.GetLeague(leagueHtml);
+                league.FplLeagueId = update.FplLeagueId;
 
-        //    //string scheduleStatus = string.Format("Status: Last='{0}', Next='{1}', IsPastDue={2}",
-        //    //    timerInfo.ScheduleStatus.Last, timerInfo.ScheduleStatus.Next, timerInfo.IsPastDue);
-        //    //Console.WriteLine(scheduleStatus);
-        //}
+                foreach (var player in league.Players)
+                {
+                    var gameweekHtml = _policy.Execute(() =>
+                        Scraper.GetHtmlByXPath(
+                            $"https://fantasy.premierleague.com/a/entry/{player.FplPlayerId}/history",
+                            "//*[@id=\"ismr-event-history\"]/div/div/div/table/tbody"));
 
-        //public static void ProcessCronJob([TimerTrigger("00:00:15", RunOnStartup = true)] TimerInfo timerInfo, TextWriter log)
-        //{
-        //    Console.WriteLine("Timer job fired!");
-        //}
+                    league.Players.First(X => X.FplPlayerId == player.FplPlayerId).Gameweeks =
+                        HtmlParser.GetGameweeks(gameweekHtml);
+                }
+
+                var response = await HttpClientProxy.Post(
+#if DEBUG
+                        ConfigurationManager.AppSettings["apiurltest"]
+#else
+                        ConfigurationManager.AppSettings["apiurl"]
+#endif
+                        , "updateleague", JsonConvert.SerializeObject(league));
+            }
+            catch
+            {
+                update.Failures++;
+
+                if (update.Failures >= 5) throw new Exception("Too many retries!");
+
+                await Queue.AddMessageAsync(new CloudQueueMessage(JsonConvert.SerializeObject(new UpdateLeagueMessage { FplLeagueId = update.FplLeagueId })));
+            }
+        }
     }
 }

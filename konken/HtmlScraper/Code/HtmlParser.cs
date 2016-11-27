@@ -26,11 +26,11 @@ namespace Common.Code
 
             var league = new League()
             {
-                Name = htmlDoc.DocumentNode.SelectSingleNode("//*[@id=\"ismr-main\"]/div/h2").InnerText.Trim()
+                Name = "Konken"//htmlDoc.DocumentNode.SelectSingleNode("//*[@id=\"ismr-main\"]/div/h2").InnerText.Trim()
             };
 
             var playerNodes =
-                htmlDoc.DocumentNode.SelectNodes("//*[@id=\"ismr-classic-standings\"]/div/div/table/tbody/tr");
+                htmlDoc.DocumentNode.SelectNodes("/tbody/tr");
 
             if (playerNodes == null) return null;
 
@@ -38,10 +38,6 @@ namespace Common.Code
 
             foreach (var playerNode in playerNodes)
             {
-#if DEBUG
-                if (players.Count == 2) continue;
-#endif
-
                 HtmlNode[] n = playerNode.ChildNodes.Where(x => x.Name == "td").ToArray();
 
                 var name = n[1].ChildNodes[1].ChildNodes[1].InnerText.Trim();
@@ -55,7 +51,7 @@ namespace Common.Code
                     Name = name,
                     TeamName = teamName,
                     FplPlayerId = fplPlayerId,
-                    Gameweeks = GetNewGameWeekHistory(fplPlayerId)
+                    //Gameweeks = GetNewGameWeekHistory(fplPlayerId)
                 };
 
                 players.Add(player);
@@ -77,7 +73,7 @@ namespace Common.Code
             return playerLink?.Substring(playerLink.LastIndexOf("/", StringComparison.Ordinal) + 1);
         }
 
-        public static IList<Gameweek> GetNewGameWeekHistory(string html)
+        public static IList<Gameweek> GetGameweeks(string html)
         {
             var htmlDoc = new HtmlAgilityPack.HtmlDocument
             {
@@ -90,7 +86,7 @@ namespace Common.Code
             if (htmlDoc.ParseErrors != null && htmlDoc.ParseErrors.Any()) return null;
 
             var nodes =
-                htmlDoc.DocumentNode.SelectNodes("//*[@id=\"ismr-event-history\"]/div/div/div/table/tbody/tr");
+                htmlDoc.DocumentNode.SelectNodes("/tbody/tr");
 
             if (nodes == null) return null;
 
@@ -131,7 +127,7 @@ namespace Common.Code
             if (htmlDoc.ParseErrors != null && htmlDoc.ParseErrors.Any()) return Chip.None;
 
             var nodes =
-                htmlDoc.DocumentNode.SelectNodes("//*[@id=\"ismr-event-chips\"]/div/div/div/table/tbody/tr");
+                htmlDoc.DocumentNode.SelectNodes("/tbody/tr");
 
             if (nodes == null) return Chip.None;
 

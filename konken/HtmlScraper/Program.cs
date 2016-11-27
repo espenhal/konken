@@ -6,22 +6,31 @@ using Microsoft.Azure.WebJobs;
 namespace HtmlScraper
 {
     // To learn more about Microsoft Azure WebJobs SDK, please see http://go.microsoft.com/fwlink/?LinkID=320976
-    class Program
+    public class Program
     {
         // Please set the following connection strings in app.config for this WebJob to run:
         // AzureWebJobsDashboard and AzureWebJobsStorage
-        static void Main()
+        public static void Main()
         {
             SetupWatcher();
 
-            var config = new JobHostConfiguration(CloudConfigurationManager.GetSetting("StorageConnectionString"));
-            
+            var config = new JobHostConfiguration(
+#if DEBUG
+                "UseDevelopmentStorage=true;"
+#else
+                CloudConfigurationManager.GetSetting("StorageConnectionString")
+#endif
+                );
+
             //config.UseTimers();
 #if DEBUG
             //config.Tracing.ConsoleLevel = TraceLevel.Info;
             //config.Queues.MaxPollingInterval = TimeSpan.FromSeconds(5);
             //config.Singleton.ListenerLockPeriod = TimeSpan.FromSeconds(15);
             config.UseDevelopmentSettings();
+//#else
+            //config.DashboardConnectionString = CloudConfigurationManager.GetSetting("StorageConnectionString");
+            //config.StorageConnectionString = CloudConfigurationManager.GetSetting("StorageConnectionString");
 #endif
 
             var host = new JobHost(config);

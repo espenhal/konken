@@ -39,4 +39,11 @@ namespace Common.Models
         TripleCaptain = 4,
         Wildcard2 = 5
     }
+
+    public class UpdateLeagueMessage
+    {
+        public string FplLeagueId { get; set; }
+        
+        public int Failures { get; set; }
+    }
 }
