@@ -9,6 +9,7 @@ using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Queue;
 using Microsoft.WindowsAzure.Storage.Table;
 using Newtonsoft.Json;
+using WebApi.Code;
 using WebApi.Models;
 
 namespace WebApi.Controllers
@@ -85,6 +86,8 @@ namespace WebApi.Controllers
                         Mapper.Map<IList<GameweekEntity>, IList<Gameweek>>(
                             gameweeksEntities.Results.Where(
                                 x => x.FplLeagueId == fplLeagueId && x.FplPlayerId == player.FplPlayerId).ToList());
+                    
+                    player.Gameweeks = player.Gameweeks.OrderBy(x => x.Number).ToList();
                 }
 
                 return Ok(league);
