@@ -3,6 +3,29 @@ using System.Collections.Generic;
 
 namespace Common.Models
 {
+    public class LeagueStanding
+    {
+        public string FplLeagueId { get; set; }
+        public string Name { get; set; }
+        public IList<PlayerStanding> PlayerStandings { get; set; }
+    }
+
+    public class PlayerStanding
+    {
+        public string FplPlayerId { get; set; }
+        public string Name { get; set; }
+        public string TeamName { get; set; }
+        public int Points { get; set; }
+        public int PointsOnBench { get; set; }
+        public int Transfers { get; set; }
+        public int TransferCosts { get; set; }
+        public IList<Chip> Chips { get; set; }
+        public double Value { get; set; }
+        public int Rank { get; set; }
+        public int Cash { get; set; }
+        public IList<int> Rounds { get; set; }
+    }
+
     public class League
     {
         public string FplLeagueId { get; set; }

@@ -33,7 +33,7 @@
         load();
 
         function load() {
-            $http.get("http://konkenapi.azurewebsites.net/getleague?fplLeagueId=414219")
+            $http.get("//konken.api/getstanding?fplLeagueId=414219")
                 .then(
                     function (response) {
                         vm.league = response.data;
@@ -42,6 +42,9 @@
                         console.log(response)
                     });
         };
+
+        $scope.orderByProp = "Value";
+        $scope.orderByReverse = true;
     }
 }());
 
