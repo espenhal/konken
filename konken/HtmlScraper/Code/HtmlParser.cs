@@ -40,8 +40,8 @@ namespace Common.Code
             {
                 HtmlNode[] n = playerNode.ChildNodes.Where(x => x.Name == "td").ToArray();
 
-                var name = n[1].ChildNodes[1].ChildNodes[1].InnerText.Trim();
-                var teamName = n[1].ChildNodes[1].ChildNodes[3].InnerText.Trim();
+                var name = n[1].ChildNodes[1].ChildNodes[3].InnerText.Trim();
+                var teamName = n[1].ChildNodes[1].ChildNodes[1].InnerText.Trim();
                 var fplPlayerId = GetFplPlayerId(n);
 
                 if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(teamName) || string.IsNullOrEmpty(fplPlayerId)) continue;
