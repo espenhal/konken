@@ -2,3 +2,44 @@
     font-size: 110%;
     font-weight: bold;
 }
+
+.cover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.BodyRow, .HeaderRow {
+    padding: 0 1px;
+    margin: 1px 0 2px 0;
+}
+
+.HeaderRow {
+    display: none;
+}
+
+    .BodyRow.even, .HeaderRow.even {
+        background-color: #eee;
+    }
+
+    .BodyRow div, .HeaderRow div {
+        line-height: 34px;
+    }
+
+@media only screen and (min-width : 992px) {
+    .HeaderRow {
+        display: block;
+        border-bottom: 1px solid #eee;
+    }
+}
+
+.text-nowrap {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

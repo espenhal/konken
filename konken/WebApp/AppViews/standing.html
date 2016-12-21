@@ -1,18 +1,18 @@
-﻿<div class="container-fluid">
-    <table class="table">
+﻿<div class="container-fluid" ng-hide="loading || error">
+    <!--<table class="table">
         <thead>
-            <tr>
-                <th>#</th>
-                <th>Navn</th>
-                <th>$</th>
-                <th>Chips</th>
-                <th>Runder</th>
-                <th style="cursor: pointer;" ng-click="orderByProp = 'Value'; orderByReverse = !orderByReverse">Poing&nbsp;<span ng-show="orderByProp === 'Value'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>
-                <th style="cursor: pointer;" ng-click="orderByProp = 'PointsOnBench'; orderByReverse = !orderByReverse">Benk&nbsp;<span ng-show="orderByProp === 'PointsOnBench'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>
-                <th style="cursor: pointer;" ng-click="orderByProp = 'Points'; orderByReverse = !orderByReverse">Netto&nbsp;<span ng-show="orderByProp === 'Points'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>
-                <th style="cursor: pointer;" ng-click="orderByProp = 'Transfers'; orderByReverse = !orderByReverse">Bytter&nbsp;<span ng-show="orderByProp === 'Transfers'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>
-                <th style="cursor: pointer;" ng-click="orderByProp = 'TransferCosts'; orderByReverse = !orderByReverse">Gebyr&nbsp;<span ng-show="orderByProp === 'TransferCosts'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>
-            </tr>
+        <tr>
+            <th>#</div>
+            <th>Navn</div>
+            <th>$</div>
+            <th>Chips</div>
+            <th>Runder</div>
+            <th style="cursor: pointer;" ng-click="orderByProp = 'Value'; orderByReverse = !orderByReverse">Poing&nbsp;<span ng-show="orderByProp === 'Value'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></div>
+            <th style="cursor: pointer;" ng-click="orderByProp = 'PointsOnBench'; orderByReverse = !orderByReverse">Benk&nbsp;<span ng-show="orderByProp === 'PointsOnBench'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></div>
+            <th style="cursor: pointer;" ng-click="orderByProp = 'Points'; orderByReverse = !orderByReverse">Netto&nbsp;<span ng-show="orderByProp === 'Points'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></div>
+            <th style="cursor: pointer;" ng-click="orderByProp = 'Transfers'; orderByReverse = !orderByReverse">Bytter&nbsp;<span ng-show="orderByProp === 'Transfers'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></div>
+            <th style="cursor: pointer;" ng-click="orderByProp = 'TransferCosts'; orderByReverse = !orderByReverse">Gebyr&nbsp;<span ng-show="orderByProp === 'TransferCosts'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></div>
+        </tr>
         </thead>
         <tbody>
         <tr ng-repeat="player in vm.league.PlayerStandings | orderBy: orderByProp:orderByReverse">
@@ -28,7 +28,43 @@
             <td ng-bind="player.TransferCosts"></td>
         </tr>
         </tbody>
-    </table>
+    </table>-->
 
-    <pre>{{vm | json}}</pre>
+    <div class="row HeaderRow">
+        <div class="col-md-1">#</div>
+        <div class="col-md-3">Navn</div>
+        <div class="col-md-1">$</div>
+        <div class="col-md-1">Chips</div>
+        <div class="col-md-1">Runder</div>
+        <div class="col-md-1" style="cursor: pointer;" ng-click="orderByProp = 'Value'; orderByReverse = !orderByReverse">Poing&nbsp;<span ng-show="orderByProp === 'Value'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></div>
+        <div class="col-md-1" style="cursor: pointer;" ng-click="orderByProp = 'PointsOnBench'; orderByReverse = !orderByReverse">Benk&nbsp;<span ng-show="orderByProp === 'PointsOnBench'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></div>
+        <div class="col-md-1" style="cursor: pointer;" ng-click="orderByProp = 'Points'; orderByReverse = !orderByReverse">Netto&nbsp;<span ng-show="orderByProp === 'Points'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></div>
+        <div class="col-md-1" style="cursor: pointer;" ng-click="orderByProp = 'Transfers'; orderByReverse = !orderByReverse">Bytter&nbsp;<span ng-show="orderByProp === 'Transfers'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></div>
+        <div class="col-md-1" style="cursor: pointer;" ng-click="orderByProp = 'TransferCosts'; orderByReverse = !orderByReverse">Gebyr&nbsp;<span ng-show="orderByProp === 'TransferCosts'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></div>
+    </div>
+    <div class="row BodyRow" ng-repeat="player in vm.league.PlayerStandings | orderBy: orderByProp:orderByReverse">
+        <div class="col-md-1" ng-bind="$index + 1"></div>
+        <div class="col-md-3">
+            <span class="standing-teamname" ng-bind="player.TeamName"></span><br /><span ng-bind="player.Name"></span>
+        </div>
+        <div class="col-md-1" ng-bind="player.Cash"></div>
+        <div class="col-md-1" ng-bind="player.Chips"></div>
+        <div class="col-md-1" ng-bind="player.Rounds"></div>
+        <div class="col-md-1" ng-bind="player.Value"></div>
+        <div class="col-md-1" ng-bind="player.PointsOnBench"></div>
+        <div class="col-md-1" ng-bind="player.Points"></div>
+        <div class="col-md-1" ng-bind="player.Transfers"></div>
+        <div class="col-md-1" ng-bind="player.TransferCosts"></div>
+    </div>
+
+
+<pre>{{vm | json}}</pre>
+</div>
+
+<div class="container-fluid cover" ng-show="loading">
+    LASTER...
+</div>
+
+<div class="container-fluid" ng-show="error">
+    FEIL!
 </div>
