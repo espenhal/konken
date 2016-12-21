@@ -33,7 +33,7 @@
         load();
 
         function load() {
-            $http.get("//konken.api/getstanding?fplLeagueId=414219")
+            $http.get("//konkenapi.azurewebsites.net/getstanding?fplLeagueId=414219")
                 .then(
                     function (response) {
                         vm.league = response.data;
