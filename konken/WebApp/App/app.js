@@ -47,8 +47,20 @@
                     });
         };
 
-        $scope.orderByProp = "Value";
+        $scope.orderByProp = "Points";
         $scope.orderByReverse = true;
+
+        $scope.OrderBy = function (prop, reverse) {
+            console.log($scope.OrderByProp + "===" + prop)
+
+            //orderByProp = 'Transfers'; orderByReverse = !orderByReverse
+            if ($scope.OrderByProp === prop) {
+                $scope.orderByReverse = !$scope.orderByReverse;
+            } else {
+                $scope.orderByProp = prop;
+                $scope.orderByReverse = (reverse) ? false : true;
+            }
+        }
     }
 }());
 

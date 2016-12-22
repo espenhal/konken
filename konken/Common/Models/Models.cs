@@ -19,6 +19,7 @@ namespace Common.Models
         public int PointsOnBench { get; set; }
         public int Transfers { get; set; }
         public int TransferCosts { get; set; }
+        public int PointsTransferCostsExcluded { get; set; }
         public IList<Chip> Chips { get; set; }
         public double Value { get; set; }
         public int Rank { get; set; }
@@ -46,11 +47,13 @@ namespace Common.Models
         public int Number { get; set; }
         public int Points { get; set; }
         public int PointsOnBench { get; set; }
+        public int OverallPoints { get; set; }
         public int Transfers { get; set; }
         public int TransferCosts { get; set; }
         public Chip Chip { get; set; }
         public double Value { get; set; }
         public int GameweekRank { get; set; }
+        public int OverallRank { get; set; }
     }
 
     public enum Chip

@@ -33,6 +33,13 @@ namespace HtmlScraper
                 CloudConfigurationManager.GetSetting("StorageConnectionString")
 #endif
                 );
+
+            // Create the queue client
+            CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
+            // Retrieve a reference to the queue
+            Queue = queueClient.GetQueueReference("konkenqueue");
+            // Create the queue if it doesn't exist
+            Queue.CreateIfNotExists();
         }
 
         public static async void GetLeague([QueueTrigger("konkenqueue")] string message, TextWriter log)
@@ -68,13 +75,13 @@ namespace HtmlScraper
 #endif
                         , "updateleague", JsonConvert.SerializeObject(league));
             }
-            catch
+            catch (Exception e)
             {
                 update.Failures++;
 
                 if (update.Failures >= 5) throw new Exception("Too many retries!");
 
-                await Queue.AddMessageAsync(new CloudQueueMessage(JsonConvert.SerializeObject(new UpdateLeagueMessage { FplLeagueId = update.FplLeagueId })));
+                await Queue.AddMessageAsync(new CloudQueueMessage(JsonConvert.SerializeObject(new UpdateLeagueMessage { FplLeagueId = update.FplLeagueId, Failures = update.Failures })));
             }
         }
     }

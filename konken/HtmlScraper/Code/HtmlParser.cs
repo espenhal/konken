@@ -104,7 +104,9 @@ namespace Common.Code
                     GameweekRank = Convert.ToInt32(n[3].InnerText.Trim().Replace(",", "")),
                     Transfers = Convert.ToInt32(n[4].InnerText.Trim()),
                     TransferCosts = Convert.ToInt32(n[5].InnerText.Trim()),
-                    Value = Convert.ToDouble(n[6].InnerText.Trim().Replace("£", "")),
+                    OverallPoints = Convert.ToInt32(n[6].InnerText.Trim()),
+                    OverallRank = Convert.ToInt32(n[7].InnerText.Trim().Replace(",", "")),
+                    Value = Convert.ToDouble(n[8].InnerText.Trim().Replace("£", "").Replace(".", ",")),
                     Chip = GetGameweekChip(html, n[0].InnerText.Trim().Replace("GW", ""))
                 };
 

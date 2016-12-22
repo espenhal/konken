@@ -131,13 +131,14 @@ namespace WebApi.Controllers
                         FplPlayerId = player.FplPlayerId,
                         Name = player.Name,
                         TeamName = player.TeamName,
-                        Points = player.Gameweeks.Sum(x => x.Points),
+                        Points = player.Gameweeks.OrderBy(x => x.Number).Last().OverallPoints, // total uten fratrekk for bytter
                         PointsOnBench = player.Gameweeks.Sum(x => x.PointsOnBench),
                         Transfers = player.Gameweeks.Sum(x => x.Transfers),
                         TransferCosts = player.Gameweeks.Sum(x => x.TransferCosts),
+                        PointsTransferCostsExcluded = player.Gameweeks.Sum(x => x.Points), // total med fratrekk for bytter
                         Chips = CalculateChips(player, league),
                         Value = player.Gameweeks.OrderBy(x => x.Number).Last().Value,
-                        Rank = 1,
+                        Rank = player.Gameweeks.OrderBy(x => x.Number).Last().OverallRank,
                         Cash = CalculateCash(player, league),
                         Rounds = CalculateRounds(player, league)
                     };
