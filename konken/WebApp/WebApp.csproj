@@ -117,6 +117,11 @@
   <ItemGroup>
     <Content Include="AppViews\standing.html" />
     <Content Include="App\app.js" />
+    <Content Include="Content\favicons\apple-touch-icon.png" />
+    <Content Include="Content\favicons\favicon-16x16.png" />
+    <Content Include="Content\favicons\favicon-32x32.png" />
+    <Content Include="Content\favicons\favicon.ico" />
+    <Content Include="Content\favicons\safari-pinned-tab.svg" />
     <Content Include="Content\styles.css" />
     <Content Include="Global.asax" />
     <Content Include="Web.config" />
