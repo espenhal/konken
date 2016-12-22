@@ -35,7 +35,8 @@
         function load() {
             $scope.loading = true;
 
-            $http.get("//konkenapi.azurewebsites.net/getstanding?fplLeagueId=414219")
+            //$http.get("//konkenapi.azurewebsites.net/getstanding?fplLeagueId=414219")
+            $http.get("//konken.api/getstanding?fplLeagueId=414219")
                 .then(
                     function (response) {
                         vm.league = response.data;
@@ -51,10 +52,10 @@
         $scope.orderByReverse = true;
 
         $scope.OrderBy = function (prop, reverse) {
-            console.log($scope.OrderByProp + "===" + prop)
+            console.log($scope.orderByProp + "===" + prop)
 
             //orderByProp = 'Transfers'; orderByReverse = !orderByReverse
-            if ($scope.OrderByProp === prop) {
+            if ($scope.orderByProp === prop) {
                 $scope.orderByReverse = !$scope.orderByReverse;
             } else {
                 $scope.orderByProp = prop;
