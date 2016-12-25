@@ -39,6 +39,8 @@
             $http.get("//konken.api/getstanding?fplLeagueId=414219")
                 .then(
                     function (response) {
+                        console.log(response.data)
+
                         vm.league = response.data;
                         $scope.loading = false;
                     },

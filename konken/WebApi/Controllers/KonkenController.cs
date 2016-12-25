@@ -136,11 +136,11 @@ namespace WebApi.Controllers
                         Transfers = player.Gameweeks.Sum(x => x.Transfers),
                         TransferCosts = player.Gameweeks.Sum(x => x.TransferCosts),
                         PointsTransferCostsExcluded = player.Gameweeks.Sum(x => x.Points), // total med fratrekk for bytter
-                        Chips = CalculateChips(player, league),
+                        Chips = player.Gameweeks.Select(x => x.Chip).ToList(),
                         Value = player.Gameweeks.OrderBy(x => x.Number).Last().Value,
                         Rank = player.Gameweeks.OrderBy(x => x.Number).Last().OverallRank,
-                        Cash = CalculateCash(player, league),
-                        Rounds = CalculateRounds(player, league)
+                        Cash = 0,
+                        GameweeksWon = CalculatePlayerGameweekWinners(player, league),
                     };
 
                     leagueStanding.PlayerStandings.Add(playerStanding);
@@ -156,43 +156,61 @@ namespace WebApi.Controllers
             }
         }
 
-        private IList<int> CalculateRounds(Player player, League league)
-        {
-            return new List<int>();
-            //var rounds = new List<int>();
-
-            //for (int i = 0; i < player.Gameweeks.Count; i++)
-            //{
-            //    var check = true;
-            //    foreach (var compare in league.Players)
-            //    {
-            //        if (player.Gameweeks[i].Points >)
-            //    }
-            //    if (check)
-            //        rounds.Add();
-            //}
-
-            ////for (int i = 1; i <= player.Gameweeks.Count; i++)
-            ////{
-            ////    if (player.Gameweeks[i].Points >)
-            ////}
-
-            ////foreach (var compare in league.Players)
-            ////{
-
-
-            ////}
-            //return rounds;
-        }
-
         private int CalculateCash(Player player, League league)
         {
             return 0;
         }
 
-        private IList<Chip> CalculateChips(Player player, League league)
+        private IList<int> CalculatePlayerGameweekWinners(Player player, League league)
         {
-            return new List<Chip>();
+            return CalculateGameweekWinners(league).Where(x => x.FplPlayerId == player.FplPlayerId).Select(x => x.Number).ToList();
+        }
+
+        private IList<GameweekWinner> CalculateGameweekWinners(League league)
+        {
+            List<GameweekWinner> gameweekWinners = new List<GameweekWinner>();
+
+            var numberOfRounds = league.Players.FirstOrDefault()?.Gameweeks.Count;
+
+            if (numberOfRounds == null)
+                return null;
+            
+            for (var i = 1; i <= numberOfRounds.Value; i++)
+            {
+                GameweekWinner gameweekWinner = new GameweekWinner() { Number = i };
+
+                foreach (var player in league.Players)
+                {
+                    if (string.IsNullOrEmpty(gameweekWinner.FplPlayerId))
+                    {
+                        gameweekWinner.FplPlayerId = player.FplPlayerId;
+                        gameweekWinner.PointsExcludedTransferCosts =
+                            player.Gameweeks.FirstOrDefault(x => x.Number == i).PointsExcludedTransferCosts;
+                        gameweekWinner.PointsOnBench = player.Gameweeks.FirstOrDefault(x => x.Number == i).PointsOnBench;
+                    }
+                    else
+                    {
+                        var gameweek = player.Gameweeks.FirstOrDefault(x => x.Number == i);
+
+                        if (gameweek.PointsExcludedTransferCosts > gameweekWinner.PointsExcludedTransferCosts)
+                        {
+                            gameweekWinner.FplPlayerId = player.FplPlayerId;
+                            gameweekWinner.PointsExcludedTransferCosts =
+                                player.Gameweeks.FirstOrDefault(x => x.Number == i).PointsExcludedTransferCosts;
+                            gameweekWinner.PointsOnBench = player.Gameweeks.FirstOrDefault(x => x.Number == i).PointsOnBench;
+                        }
+                        else if (gameweek.PointsExcludedTransferCosts == gameweekWinner.PointsOnBench &&
+                                 gameweek.PointsOnBench > gameweekWinner.PointsOnBench)
+                        {
+                            
+                        }
+                        //else if ... flere sammenligninger
+                    }
+                }
+                gameweekWinners.Add(gameweekWinner);
+            }
+
+            return gameweekWinners;
         }
 
         private async Task<League> GetLeague(string fplLeagueId)

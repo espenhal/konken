@@ -6,7 +6,7 @@
                 <th>#</th>
                 <th>Navn</th> <!--style="cursor: pointer;" ng-click="OrderBy('TeamName')">Navn&nbsp;<span ng-show="orderByProp === 'TeamName'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>-->
                 <th style="cursor: pointer;" ng-click="OrderBy('Cash')">$&nbsp;<span ng-show="orderByProp === 'Cash'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>
-                <th style="cursor: pointer;" ng-click="OrderBy('Rounds')">Runder&nbsp;<span ng-show="orderByProp === 'Rounds'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>
+                <th style="cursor: pointer;" ng-click="OrderBy('GameweeksWon')">Runder&nbsp;<span ng-show="orderByProp === 'GameweeksWon'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>
                 <th style="cursor: pointer;" ng-click="OrderBy('Chips')">Chips&nbsp;<span ng-show="orderByProp === 'Chips'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>
                 <th style="cursor: pointer;" ng-click="OrderBy('Points')">Poing&nbsp;<span ng-show="orderByProp === 'Points'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>
                 <th style="cursor: pointer;" ng-click="OrderBy('Transfers')">Bytter&nbsp;<span ng-show="orderByProp === 'Transfers'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>
@@ -24,7 +24,7 @@
                     <span class="standing-teamname" ng-bind="player.TeamName"></span><br /><span ng-bind="player.Name"></span>
                 </td>
                 <td ng-bind="player.Cash"></td>
-                <td ng-bind="player.Rounds"></td>
+                <td ng-bind="player.GameweeksWon"></td>
                 <td ng-bind="player.Chips"></td>
                 <td ng-bind="player.Points"></td>
                 <td ng-bind="player.PointsOnBench"></td>
@@ -57,7 +57,7 @@
             <span class="standing-teamname" ng-bind="player.TeamName"></span><br/><span ng-bind="player.Name"></span>
         </div>
         <div class="col-md-1" ng-bind="player.Cash"></div>
-        <div class="col-md-1" ng-bind="player.Rounds"></div>
+        <div class="col-md-1" ng-bind="player.GameweeksWon"></div>
         <div class="col-md-1" ng-bind="player.Chips"></div>
         <div class="col-md-1" ng-bind="player.Points"></div>
         <div class="col-md-1" ng-bind="player.PointsOnBench"></div>

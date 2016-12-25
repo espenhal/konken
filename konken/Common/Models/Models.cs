@@ -24,7 +24,7 @@ namespace Common.Models
         public double Value { get; set; }
         public int Rank { get; set; }
         public int Cash { get; set; }
-        public IList<int> Rounds { get; set; }
+        public IList<int> GameweeksWon { get; set; }
     }
 
     public class League
@@ -54,6 +54,15 @@ namespace Common.Models
         public double Value { get; set; }
         public int GameweekRank { get; set; }
         public int OverallRank { get; set; }
+        public int PointsExcludedTransferCosts => Points - Transfers;
+    }
+
+    public class GameweekWinner
+    {
+        public int Number { get; set; }
+        public string FplPlayerId { get; set; }
+        public int PointsExcludedTransferCosts { get; set; }
+        public int PointsOnBench { get; set; }
     }
 
     public enum Chip

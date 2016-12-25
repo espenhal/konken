@@ -107,7 +107,7 @@ namespace Common.Code
                     OverallPoints = Convert.ToInt32(n[6].InnerText.Trim()),
                     OverallRank = Convert.ToInt32(n[7].InnerText.Trim().Replace(",", "")),
                     Value = Convert.ToDouble(n[8].InnerText.Trim().Replace("£", "").Replace(".", ",")),
-                    Chip = GetGameweekChip(html, n[0].InnerText.Trim().Replace("GW", ""))
+                    //Chip = GetGameweekChip(html, n[0].InnerText.Trim().Replace("GW", ""))
                 };
 
                 gameweeks.Add(gw);
@@ -116,7 +116,7 @@ namespace Common.Code
             return gameweeks;
         }
 
-        private static Chip GetGameweekChip(string html, string gameweekNumber)
+        public static void GetGameweekChip(Player player, string html)
         {
             HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument();
 
@@ -126,34 +126,35 @@ namespace Common.Code
             // filePath is a path to a file containing the html
             htmlDoc.LoadHtml(html);
 
-            if (htmlDoc.ParseErrors != null && htmlDoc.ParseErrors.Any()) return Chip.None;
+            if (htmlDoc.ParseErrors != null && htmlDoc.ParseErrors.Any()) return;
 
             var nodes =
                 htmlDoc.DocumentNode.SelectNodes("/tbody/tr");
 
-            if (nodes == null) return Chip.None;
+            if (nodes == null) return;
 
             foreach (var node in nodes)
             {
                 var n = node.ChildNodes.Where(x => x.Name == "td").ToArray();
 
-                if (n[3].InnerText.Trim().Replace("GW", "") == gameweekNumber)
+                var gameweekNumber = Convert.ToInt32(n[3].InnerText.Trim().Replace("GW", "")) - 1;
+                
+                switch (n[1].InnerText.Trim())
                 {
-                    switch (n[1].InnerText.Trim())
-                    {
-                        case "Wildcard":
-                            return Chip.Wildcard;
-                        case "Bench Boost":
-                            return Chip.BenchBoost;
-                        case "All Out Attack":
-                            return Chip.AllOutAttack;
-                        case "Triple Captain":
-                            return Chip.TripleCaptain;
-                    }
+                    case "Wildcard":
+                        player.Gameweeks[gameweekNumber].Chip = Chip.Wildcard;
+                        break;
+                    case "Bench Boost":
+                        player.Gameweeks[gameweekNumber].Chip = Chip.BenchBoost;
+                        break;
+                    case "All Out Attack":
+                        player.Gameweeks[gameweekNumber].Chip = Chip.AllOutAttack;
+                        break;
+                    case "Triple Captain":
+                        player.Gameweeks[gameweekNumber].Chip = Chip.TripleCaptain;
+                        break;
                 }
             }
-
-            return Chip.None;
         }
 
         //private static IList<Chips> GetChipsHistory(string id)

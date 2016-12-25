@@ -67,6 +67,18 @@ namespace HtmlScraper
                         HtmlParser.GetGameweeks(gameweekHtml);
                 }
 
+                foreach (var player in league.Players)
+                {
+                    var gameweekChipsHtml = _policy.Execute(() =>
+                        Scraper.GetHtmlByXPath(
+                            $"https://fantasy.premierleague.com/a/entry/{player.FplPlayerId}/history",
+                            "//*[@id=\"ismr-event-chips\"]/div/div/div/table/tbody"));
+
+                    HtmlParser.GetGameweekChip(player, gameweekChipsHtml);
+                    //league.Players.First(X => X.FplPlayerId == player.FplPlayerId).Gameweeks =
+                    //    HtmlParser.GetGameweeks(gameweekHtml);
+                }
+
                 var response = await HttpClientProxy.Post(
 #if DEBUG
                         ConfigurationManager.AppSettings["apiurltest"]
