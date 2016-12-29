@@ -38,13 +38,10 @@
             $http.get("//konkenapi.azurewebsites.net/getstanding?fplLeagueId=414219")
                 .then(
                     function (response) {
-                        console.log(response.data)
-
                         vm.league = response.data;
                         $scope.loading = false;
                     },
                     function (response) {
-                        console.log(response)
                         $scope.error = true;
                     });
         };
@@ -53,8 +50,6 @@
         $scope.orderByReverse = true;
 
         $scope.OrderBy = function (prop, reverse) {
-            console.log($scope.orderByProp + "===" + prop)
-
             //orderByProp = 'Transfers'; orderByReverse = !orderByReverse
             if ($scope.orderByProp === prop) {
                 $scope.orderByReverse = !$scope.orderByReverse;
