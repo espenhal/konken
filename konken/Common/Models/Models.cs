@@ -7,7 +7,7 @@ namespace Common.Models
     {
         public string FplLeagueId { get; set; }
         public string Name { get; set; }
-        public IList<PlayerStanding> PlayerStandings { get; set; }
+        public List<PlayerStanding> PlayerStandings { get; set; }
     }
 
     public class PlayerStanding
@@ -20,18 +20,18 @@ namespace Common.Models
         public int Transfers { get; set; }
         public int TransferCosts { get; set; }
         public int PointsTransferCostsExcluded { get; set; }
-        public IList<Chip> Chips { get; set; }
+        public List<Chip> Chips { get; set; }
         public double Value { get; set; }
         public int Rank { get; set; }
         public int Cash { get; set; }
-        public IList<int> GameweeksWon { get; set; }
+        public List<int> GameweeksWon { get; set; }
     }
 
     public class League
     {
         public string FplLeagueId { get; set; }
         public string Name { get; set; }
-        public IList<Player> Players { get; set; }
+        public List<Player> Players { get; set; }
     }
 
     public class Player
@@ -39,7 +39,7 @@ namespace Common.Models
         public string FplPlayerId { get; set; }
         public string Name { get; set; }
         public string TeamName { get; set; }
-        public IList<Gameweek> Gameweeks { get; set; }
+        public List<Gameweek> Gameweeks { get; set; }
     }
 
     public class Gameweek

@@ -139,7 +139,7 @@ namespace WebApi.Controllers
                         Chips = player.Gameweeks.Select(x => x.Chip).ToList(),
                         Value = player.Gameweeks.OrderBy(x => x.Number).Last().Value,
                         Rank = player.Gameweeks.OrderBy(x => x.Number).Last().OverallRank,
-                        Cash = 0,
+                        Cash = CalculateCash(player, league),
                         GameweeksWon = CalculatePlayerGameweekWinners(player, league),
                     };
 
@@ -158,15 +158,15 @@ namespace WebApi.Controllers
 
         private int CalculateCash(Player player, League league)
         {
-            return 0;
+            return 200 * CalculatePlayerGameweekWinners(player, league).Count;
         }
 
-        private IList<int> CalculatePlayerGameweekWinners(Player player, League league)
+        private List<int> CalculatePlayerGameweekWinners(Player player, League league)
         {
             return CalculateGameweekWinners(league).Where(x => x.FplPlayerId == player.FplPlayerId).Select(x => x.Number).ToList();
         }
 
-        private IList<GameweekWinner> CalculateGameweekWinners(League league)
+        private List<GameweekWinner> CalculateGameweekWinners(League league)
         {
             List<GameweekWinner> gameweekWinners = new List<GameweekWinner>();
 
@@ -174,7 +174,7 @@ namespace WebApi.Controllers
 
             if (numberOfRounds == null)
                 return null;
-            
+
             for (var i = 1; i <= numberOfRounds.Value; i++)
             {
                 GameweekWinner gameweekWinner = new GameweekWinner() { Number = i };
@@ -192,6 +192,9 @@ namespace WebApi.Controllers
                     {
                         var gameweek = player.Gameweeks.FirstOrDefault(x => x.Number == i);
 
+                        if (gameweek == null)
+                            continue;
+
                         if (gameweek.PointsExcludedTransferCosts > gameweekWinner.PointsExcludedTransferCosts)
                         {
                             gameweekWinner.FplPlayerId = player.FplPlayerId;
@@ -202,7 +205,7 @@ namespace WebApi.Controllers
                         else if (gameweek.PointsExcludedTransferCosts == gameweekWinner.PointsOnBench &&
                                  gameweek.PointsOnBench > gameweekWinner.PointsOnBench)
                         {
-                            
+
                         }
                         //else if ... flere sammenligninger
                     }
@@ -237,12 +240,12 @@ namespace WebApi.Controllers
                 TableQuerySegment<GameweekEntity> gameweeksEntities =
                     await Table.ExecuteQuerySegmentedAsync(gameweekTableQuery, new TableContinuationToken());
 
-                league.Players = Mapper.Map<IList<PlayerEntity>, IList<Player>>(playerEntities.Results);
+                league.Players = Mapper.Map<List<PlayerEntity>, List<Player>>(playerEntities.Results);
 
                 foreach (var player in league.Players)
                 {
                     player.Gameweeks =
-                        Mapper.Map<IList<GameweekEntity>, IList<Gameweek>>(
+                        Mapper.Map<List<GameweekEntity>, List<Gameweek>>(
                             gameweeksEntities.Results.Where(
                                 x => x.FplLeagueId == fplLeagueId && x.FplPlayerId == player.FplPlayerId).ToList());
 

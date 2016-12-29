@@ -24,23 +24,23 @@ namespace HtmlScraper
 
         private static CloudQueue Queue { get; set; }
 
-        public Functions()
-        {
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
-#if DEBUG
-                "UseDevelopmentStorage=true;"
-#else
-                CloudConfigurationManager.GetSetting("StorageConnectionString")
-#endif
-                );
+//        public Functions()
+//        {
+//            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
+//#if DEBUG
+//                "UseDevelopmentStorage=true;"
+//#else
+//                CloudConfigurationManager.GetSetting("StorageConnectionString")
+//#endif
+//                );
 
-            // Create the queue client
-            CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
-            // Retrieve a reference to the queue
-            Queue = queueClient.GetQueueReference("konkenqueue");
-            // Create the queue if it doesn't exist
-            Queue.CreateIfNotExists();
-        }
+//            // Create the queue client
+//            CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
+//            // Retrieve a reference to the queue
+//            Queue = queueClient.GetQueueReference("konkenqueue");
+//            // Create the queue if it doesn't exist
+//            Queue.CreateIfNotExists();
+//        }
 
         public static async void GetLeague([QueueTrigger("konkenqueue")] string message, TextWriter log)
         {

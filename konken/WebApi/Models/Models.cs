@@ -48,7 +48,13 @@ namespace WebApi.Models
         public int OverallPoints { get; set; }
         public int Transfers { get; set; }
         public int TransferCosts { get; set; }
-        public Chip Chip { get; set; }
+        public int ChipValue { get; set; }
+        [IgnoreProperty]
+        public Chip Chip
+        {
+            get { return (Chip) ChipValue; }
+            set { ChipValue = (int) value; }
+        }
         public double Value { get; set; }
         public int GameweekRank { get; set; }
         public int OverallRank { get; set; }
