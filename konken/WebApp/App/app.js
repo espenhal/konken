@@ -35,8 +35,7 @@
         function load() {
             $scope.loading = true;
 
-            //$http.get("//konkenapi.azurewebsites.net/getstanding?fplLeagueId=414219")
-            $http.get("//konken.api/getstanding?fplLeagueId=414219")
+            $http.get("//konkenapi.azurewebsites.net/getstanding?fplLeagueId=414219")
                 .then(
                     function (response) {
                         console.log(response.data)
