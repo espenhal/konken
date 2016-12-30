@@ -43,3 +43,13 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+td.won span {
+    display: inline-block;
+    margin-right: 5px;
+}
+
+td.chip span.chip {
+    display: inline-block;
+    margin-right: 5px;
+}

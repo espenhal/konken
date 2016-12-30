@@ -23,9 +23,16 @@
                 <td>
                     <span class="standing-teamname" ng-bind="player.TeamName"></span><br /><span ng-bind="player.Name"></span>
                 </td>
-                <td ng-bind="player.Cash"></td>
-                <td ng-bind="player.GameweeksWon"></td>
-                <td ng-bind="player.Chips"></td>
+                <td><span ng-bind="player.Cash"></span></td>
+                <td class="won">
+                    <span ng-repeat="won in player.GameweeksWon" ng-bind="won"></span>
+                </td>
+                <td class="chip">
+                    <span class="chip" ng-repeat="chip in player.Chips" ng-hide="chip === 'None'">
+                        <span class="gwnumber" ng-bind="$index + 1"></span>
+                        <span class="" ng-bind="chip"></span>
+                    </span>
+                </td>
                 <td ng-bind="player.Points"></td>
                 <td ng-bind="player.PointsOnBench"></td>
                 <td ng-bind="player.Transfers"></td>

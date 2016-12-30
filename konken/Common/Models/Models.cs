@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Common.Models
 {
@@ -65,6 +67,7 @@ namespace Common.Models
         public int PointsOnBench { get; set; }
     }
 
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum Chip
     {
         None = 0,

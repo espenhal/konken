@@ -36,12 +36,19 @@
             $scope.loading = true;
 
             $http.get("//konkenapi.azurewebsites.net/getstanding?fplLeagueId=414219")
+            //$http.get("//konken.api/getstanding?fplLeagueId=414219")
                 .then(
                     function (response) {
                         vm.league = response.data;
+
+                        angular.forEach(vm.league.PlayerStandings, function(o) {
+                            o.Chips = Object.assign({}, o.Chips);
+                        });
+
                         $scope.loading = false;
                     },
                     function (response) {
+                        console.log(response);
                         $scope.error = true;
                     });
         };
