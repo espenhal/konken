@@ -83,7 +83,7 @@
         function load() {
             $scope.loading = true;
 
-            $http.get(envSvc.get("url") + "getstanding?fplLeagueId=414219&round=38")
+            $http.get(envSvc.get("url") + "getstanding?fplLeagueId=414219")
                 .then(
                     function (response) {
                         vm.league = response.data;

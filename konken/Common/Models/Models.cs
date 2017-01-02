@@ -25,7 +25,7 @@ namespace Common.Models
         public List<Chip> Chips { get; set; }
         public double Value { get; set; }
         public int Rank { get; set; }
-        public int Cash { get; set; }
+        public double Cash { get; set; }
         public List<int> GameweeksWon { get; set; }
     }
 
@@ -57,6 +57,7 @@ namespace Common.Models
         public int GameweekRank { get; set; }
         public int OverallRank { get; set; }
         public int PointsExcludedTransferCosts => Points - Transfers;
+        public int ScoredGoals { get; set; }
     }
 
     public class GameweekWinner
@@ -65,6 +66,7 @@ namespace Common.Models
         public string FplPlayerId { get; set; }
         public int PointsExcludedTransferCosts { get; set; }
         public int PointsOnBench { get; set; }
+        public int ScoredGoals { get; set; }
     }
 
     [JsonConverter(typeof(StringEnumConverter))]

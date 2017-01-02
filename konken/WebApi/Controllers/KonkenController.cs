@@ -59,7 +59,7 @@ namespace WebApi.Controllers
         {
             try
             {
-                return Ok(await GetLeague(fplLeagueId, round));
+                return Ok(await CalculateLeague(fplLeagueId, round));
             }
             catch (Exception e)
             {
@@ -112,43 +112,11 @@ namespace WebApi.Controllers
         }
 
         [HttpGet, Route("getstanding")]
-        public async Task<IHttpActionResult> GetLeagueStanding(string fplLeagueId, int round)
+        public async Task<IHttpActionResult> GetLeagueStanding(string fplLeagueId, int? round = null)
         {
             try
             {
-                var league = await GetLeague(fplLeagueId, round);
-
-                LeagueStanding leagueStanding = new LeagueStanding()
-                {
-                    FplLeagueId = league.FplLeagueId,
-                    Name = league.Name,
-                    PlayerStandings = new List<PlayerStanding>()
-                };
-                foreach (var player in league.Players)
-                {
-                    PlayerStanding playerStanding = new PlayerStanding()
-                    {
-                        FplPlayerId = player.FplPlayerId,
-                        Name = player.Name,
-                        TeamName = player.TeamName,
-                        Points = player.Gameweeks.OrderBy(x => x.Number).Last().OverallPoints, // total uten fratrekk for bytter
-                        PointsOnBench = player.Gameweeks.Sum(x => x.PointsOnBench),
-                        Transfers = player.Gameweeks.Sum(x => x.Transfers),
-                        TransferCosts = player.Gameweeks.Sum(x => x.TransferCosts),
-                        PointsTransferCostsExcluded = player.Gameweeks.Sum(x => x.Points), // total med fratrekk for bytter
-                        Chips = player.Gameweeks.Select(x => x.Chip).ToList(),
-                        Value = player.Gameweeks.OrderBy(x => x.Number).Last().Value,
-                        Rank = player.Gameweeks.OrderBy(x => x.Number).Last().OverallRank,
-                        Cash = CalculateCash(player, league),
-                        GameweeksWon = CalculatePlayerGameweekWinners(player, league),
-                    };
-
-                    leagueStanding.PlayerStandings.Add(playerStanding);
-                }
-
-                leagueStanding.PlayerStandings = leagueStanding.PlayerStandings.OrderBy(x => x.Points).ToList();
-
-                return Ok(leagueStanding);
+                return Ok(await CalculateLeagueStanding(fplLeagueId, round));
             }
             catch (Exception e)
             {
@@ -156,11 +124,60 @@ namespace WebApi.Controllers
             }
         }
 
-        private int CalculateCash(Player player, League league)
+        private async Task<LeagueStanding> CalculateLeagueStanding(string fplLeagueId, int? round)
+        {
+            var league = await CalculateLeague(fplLeagueId, round);
+
+            LeagueStanding leagueStanding = new LeagueStanding()
+            {
+                FplLeagueId = league.FplLeagueId,
+                Name = league.Name,
+                PlayerStandings = new List<PlayerStanding>()
+            };
+            foreach (var player in league.Players)
+            {
+                PlayerStanding playerStanding = new PlayerStanding()
+                {
+                    FplPlayerId = player.FplPlayerId,
+                    Name = player.Name,
+                    TeamName = player.TeamName,
+                    Points = player.Gameweeks.OrderBy(x => x.Number).Last().OverallPoints, // total uten fratrekk for bytter
+                    PointsOnBench = player.Gameweeks.Sum(x => x.PointsOnBench),
+                    Transfers = player.Gameweeks.Sum(x => x.Transfers),
+                    TransferCosts = player.Gameweeks.Sum(x => x.TransferCosts),
+                    PointsTransferCostsExcluded = player.Gameweeks.Sum(x => x.Points), // total med fratrekk for bytter
+                    Chips = player.Gameweeks.Select(x => x.Chip).ToList(),
+                    Value = player.Gameweeks.OrderBy(x => x.Number).Last().Value,
+                    Rank = player.Gameweeks.OrderBy(x => x.Number).Last().OverallRank,
+                    Cash = CalculateGameweekWinnerCash(player, league),
+                    GameweeksWon = CalculatePlayerGameweekWinners(player, league),
+                };
+
+                leagueStanding.PlayerStandings.Add(playerStanding);
+            }
+
+            leagueStanding.PlayerStandings = leagueStanding.PlayerStandings.OrderBy(x => x.Points).ToList();
+
+            CalculateHalfSeasonCash(leagueStanding, league);
+
+            return leagueStanding;
+        }
+
+        private double CalculateGameweekWinnerCash(Player player, League league)
         {
             return 200 * CalculatePlayerGameweekWinners(player, league).Count;
         }
 
+        private static void CalculateHalfSeasonCash(LeagueStanding leagueStanding, League league)
+        {
+            if (league.Players.First().Gameweeks.Count >= 20)
+                leagueStanding.PlayerStandings.Last().Cash += league.Players.Count * 62.5;
+        }
+        
+        ////cup TODO
+        
+        ////full season TODO
+        
         private List<int> CalculatePlayerGameweekWinners(Player player, League league)
         {
             return CalculateGameweekWinners(league).Where(x => x.FplPlayerId == player.FplPlayerId).Select(x => x.Number).ToList();
@@ -181,12 +198,14 @@ namespace WebApi.Controllers
 
                 foreach (var player in league.Players)
                 {
+                    if (player?.Gameweeks == null || player.Gameweeks.Count < 1)
+                        continue;
+
+                    var better = false;
+
                     if (string.IsNullOrEmpty(gameweekWinner.FplPlayerId))
                     {
-                        gameweekWinner.FplPlayerId = player.FplPlayerId;
-                        gameweekWinner.PointsExcludedTransferCosts =
-                            player.Gameweeks.FirstOrDefault(x => x.Number == i).PointsExcludedTransferCosts;
-                        gameweekWinner.PointsOnBench = player.Gameweeks.FirstOrDefault(x => x.Number == i).PointsOnBench;
+                        better = true;
                     }
                     else
                     {
@@ -197,17 +216,44 @@ namespace WebApi.Controllers
 
                         if (gameweek.PointsExcludedTransferCosts > gameweekWinner.PointsExcludedTransferCosts)
                         {
-                            gameweekWinner.FplPlayerId = player.FplPlayerId;
-                            gameweekWinner.PointsExcludedTransferCosts =
-                                player.Gameweeks.FirstOrDefault(x => x.Number == i).PointsExcludedTransferCosts;
-                            gameweekWinner.PointsOnBench = player.Gameweeks.FirstOrDefault(x => x.Number == i).PointsOnBench;
+                            better = true;
                         }
-                        else if (gameweek.PointsExcludedTransferCosts == gameweekWinner.PointsOnBench &&
-                                 gameweek.PointsOnBench > gameweekWinner.PointsOnBench)
+                        else
                         {
-
+                            if (gameweek.PointsExcludedTransferCosts == gameweekWinner.PointsExcludedTransferCosts)
+                            {
+                                if (gameweek.PointsOnBench > gameweekWinner.PointsOnBench)
+                                    better = true;
+                                else
+                                {
+                                    if (gameweek.PointsOnBench == gameweekWinner.PointsOnBench)
+                                    {
+                                        if (gameweek.ScoredGoals > gameweekWinner.ScoredGoals)
+                                            better = true;
+                                        else
+                                        {
+                                            // poengdeling!
+                                        }
+                                    }
+                                }
+                            }
                         }
-                        //else if ... flere sammenligninger
+                    }
+
+                    if (better)
+                    {
+                        var fplPlayerId = player.FplPlayerId;
+                        var pointsExcludedTransferCosts =
+                            player.Gameweeks.FirstOrDefault(x => x.Number == i)?.PointsExcludedTransferCosts;
+                        var pointsOnBench = player.Gameweeks.FirstOrDefault(x => x.Number == i)?.PointsOnBench;
+
+                        if (string.IsNullOrEmpty(fplPlayerId) || pointsExcludedTransferCosts == null || pointsOnBench == null)
+                            continue;
+
+                        gameweekWinner.FplPlayerId = fplPlayerId;
+                        gameweekWinner.PointsExcludedTransferCosts = pointsExcludedTransferCosts.Value;
+                        gameweekWinner.PointsOnBench = pointsOnBench.Value;
+                        gameweekWinner.ScoredGoals = 0;
                     }
                 }
                 gameweekWinners.Add(gameweekWinner);
@@ -216,7 +262,7 @@ namespace WebApi.Controllers
             return gameweekWinners;
         }
 
-        private async Task<League> GetLeague(string fplLeagueId, int? round)
+        private async Task<League> CalculateLeague(string fplLeagueId, int? round = null)
         {
             TableOperation retrieveLeagueOperation = TableOperation.Retrieve<LeagueEntity>("League", fplLeagueId);
 
