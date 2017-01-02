@@ -55,11 +55,11 @@ namespace WebApi.Controllers
         }
 
         [HttpGet, Route("getleague")]
-        public async Task<IHttpActionResult> Get(string fplLeagueId)
+        public async Task<IHttpActionResult> Get(string fplLeagueId, int? round = null)
         {
             try
             {
-                return Ok(await GetLeague(fplLeagueId));
+                return Ok(await GetLeague(fplLeagueId, round));
             }
             catch (Exception e)
             {
@@ -112,11 +112,11 @@ namespace WebApi.Controllers
         }
 
         [HttpGet, Route("getstanding")]
-        public async Task<IHttpActionResult> GetLeagueStanding(string fplLeagueId)
+        public async Task<IHttpActionResult> GetLeagueStanding(string fplLeagueId, int round)
         {
             try
             {
-                var league = await GetLeague(fplLeagueId);
+                var league = await GetLeague(fplLeagueId, round);
 
                 LeagueStanding leagueStanding = new LeagueStanding()
                 {
@@ -216,7 +216,7 @@ namespace WebApi.Controllers
             return gameweekWinners;
         }
 
-        private async Task<League> GetLeague(string fplLeagueId)
+        private async Task<League> GetLeague(string fplLeagueId, int? round)
         {
             TableOperation retrieveLeagueOperation = TableOperation.Retrieve<LeagueEntity>("League", fplLeagueId);
 
@@ -249,7 +249,10 @@ namespace WebApi.Controllers
                             gameweeksEntities.Results.Where(
                                 x => x.FplLeagueId == fplLeagueId && x.FplPlayerId == player.FplPlayerId).ToList());
 
-                    player.Gameweeks = player.Gameweeks.OrderBy(x => x.Number).ToList();
+                    if (round == null)
+                        round = player.Gameweeks.Count;
+
+                    player.Gameweeks = player.Gameweeks.Where(x => x.Number <= round).OrderBy(x => x.Number).ToList();
                 }
             }
             return league;
