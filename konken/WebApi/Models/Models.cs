@@ -58,5 +58,7 @@ namespace WebApi.Models
         public double Value { get; set; }
         public int GameweekRank { get; set; }
         public int OverallRank { get; set; }
+        public int ScoredGoals { get; set; }
+        public bool Cup { get; set; }
     }
 }

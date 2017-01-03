@@ -27,6 +27,7 @@ namespace Common.Models
         public int Rank { get; set; }
         public double Cash { get; set; }
         public List<int> GameweeksWon { get; set; }
+        public int CupRounds { get; set; }
     }
 
     public class League
@@ -58,6 +59,7 @@ namespace Common.Models
         public int OverallRank { get; set; }
         public int PointsExcludedTransferCosts => Points - Transfers;
         public int ScoredGoals { get; set; }
+        public bool Cup { get; set; }
     }
 
     public class GameweekWinner

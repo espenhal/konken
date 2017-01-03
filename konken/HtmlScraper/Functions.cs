@@ -16,39 +16,19 @@ namespace HtmlScraper
 {
     public class Functions
     {
-        private static readonly Policy _policy = Policy
+        private static readonly Policy Policy = Policy
             .Handle<Exception>()
             .WaitAndRetry(5, retryAttempt =>
                 TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))
             );
-
-        private static CloudQueue Queue { get; set; }
-
-//        public Functions()
-//        {
-//            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
-//#if DEBUG
-//                "UseDevelopmentStorage=true;"
-//#else
-//                CloudConfigurationManager.GetSetting("StorageConnectionString")
-//#endif
-//                );
-
-//            // Create the queue client
-//            CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
-//            // Retrieve a reference to the queue
-//            Queue = queueClient.GetQueueReference("konkenqueue");
-//            // Create the queue if it doesn't exist
-//            Queue.CreateIfNotExists();
-//        }
-
+        
         public static async void GetLeague([QueueTrigger("konkenqueue")] string message, TextWriter log)
         {
             var update = JsonConvert.DeserializeObject<UpdateLeagueMessage>(message);
 
             try
             {
-                var leagueHtml = _policy.Execute(() =>
+                var leagueHtml = Policy.Execute(() =>
                     Scraper.GetHtmlByXPath(
                         $"https://fantasy.premierleague.com/a/leagues/standings/{update.FplLeagueId}/classic",
                         "//*[@id=\"ismr-classic-standings\"]/div/div/table/tbody"));
@@ -58,25 +38,34 @@ namespace HtmlScraper
 
                 foreach (var player in league.Players)
                 {
-                    var gameweekHtml = _policy.Execute(() =>
+                    var gameweekHtml = Policy.Execute(() =>
                         Scraper.GetHtmlByXPath(
                             $"https://fantasy.premierleague.com/a/entry/{player.FplPlayerId}/history",
                             "//*[@id=\"ismr-event-history\"]/div/div/div/table/tbody"));
 
-                    league.Players.First(X => X.FplPlayerId == player.FplPlayerId).Gameweeks =
+                    league.Players.First(x => x.FplPlayerId == player.FplPlayerId).Gameweeks =
                         HtmlParser.GetGameweeks(gameweekHtml);
                 }
 
                 foreach (var player in league.Players)
                 {
-                    var gameweekChipsHtml = _policy.Execute(() =>
+                    var gameweekChipsHtml = Policy.Execute(() =>
                         Scraper.GetHtmlByXPath(
                             $"https://fantasy.premierleague.com/a/entry/{player.FplPlayerId}/history",
                             "//*[@id=\"ismr-event-chips\"]/div/div/div/table/tbody"));
 
                     HtmlParser.GetGameweekChip(player, gameweekChipsHtml);
-                    //league.Players.First(X => X.FplPlayerId == player.FplPlayerId).Gameweeks =
-                    //    HtmlParser.GetGameweeks(gameweekHtml);
+                }
+
+                foreach (var player in league.Players)
+                {
+                    var cupHistoryHtml = Policy.Execute(() =>
+                        Scraper.GetHtmlByXPath(
+                            $"https://fantasy.premierleague.com/a/leagues/cup/{player.FplPlayerId}",
+                            "//*[@id=\"ismr-cup-matches\"]/div/div/div/table/tbody", false));
+
+                    if (!string.IsNullOrWhiteSpace(cupHistoryHtml))
+                        HtmlParser.GetCupHistory(player, cupHistoryHtml);
                 }
 
                 var response = await HttpClientProxy.Post(
@@ -93,7 +82,22 @@ namespace HtmlScraper
 
                 if (update.Failures >= 5) throw new Exception("Too many retries!");
 
-                await Queue.AddMessageAsync(new CloudQueueMessage(JsonConvert.SerializeObject(new UpdateLeagueMessage { FplLeagueId = update.FplLeagueId, Failures = update.Failures })));
+                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
+#if DEBUG
+                "UseDevelopmentStorage=true;"
+#else
+                CloudConfigurationManager.GetSetting("StorageConnectionString")
+#endif
+                );
+
+                // Create the queue client
+                CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
+                // Retrieve a reference to the queue
+                CloudQueue queue = queueClient.GetQueueReference("konkenqueue");
+                // Create the queue if it doesn't exist
+                queue.CreateIfNotExists();
+
+                await queue.AddMessageAsync(new CloudQueueMessage(JsonConvert.SerializeObject(new UpdateLeagueMessage { FplLeagueId = update.FplLeagueId, Failures = update.Failures })));
             }
         }
     }

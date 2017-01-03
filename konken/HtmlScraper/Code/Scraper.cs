@@ -1,11 +1,12 @@
 ﻿using System;
+using System.CodeDom;
 using OpenQA.Selenium.PhantomJS;
 
 namespace HtmlScraper.Code
 {
     public class Scraper
     {
-        public static string GetHtml(string url, string htmlElementToFind = null)
+        public static string GetHtml(string url, string htmlElementToFind = null, bool throwErrorOnElementNotFound = true)
         {
             string html = null;
 
@@ -28,21 +29,21 @@ namespace HtmlScraper.Code
                 }
                 catch (Exception e)
                 {
-                    throw;
+                    //just for debugging
                 }
                 finally
                 {
                     driver.Quit();
                 }
             }
-
-            if (string.IsNullOrEmpty(html))
-                 throw new Exception("PhantomJSDriver fails!");
+            
+            if (throwErrorOnElementNotFound && string.IsNullOrEmpty(html))
+                throw new Exception("PhantomJSDriver fails!");
 
             return html;
         }
 
-        public static string GetHtmlByXPath(string url, string xpath)
+        public static string GetHtmlByXPath(string url, string xpath, bool throwErrorOnElementNotFound = true)
         {
             string html = null;
 
@@ -63,7 +64,7 @@ namespace HtmlScraper.Code
                 }
                 catch (Exception e)
                 {
-                    throw;
+                    //just for debugging
                 }
                 finally
                 {
@@ -71,7 +72,7 @@ namespace HtmlScraper.Code
                 }
             }
 
-            if (string.IsNullOrEmpty(html))
+            if (throwErrorOnElementNotFound && string.IsNullOrEmpty(html))
                 throw new Exception("PhantomJSDriver fails!");
 
             return html;

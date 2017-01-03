@@ -38,6 +38,9 @@ namespace Common.Code
 
             foreach (var playerNode in playerNodes)
             {
+#if DEBUG
+                //if (players.Count == 2) continue;
+#endif
                 HtmlNode[] n = playerNode.ChildNodes.Where(x => x.Name == "td").ToArray();
 
                 var name = n[1].ChildNodes[1].ChildNodes[3].InnerText.Trim();
@@ -138,7 +141,7 @@ namespace Common.Code
                 var n = node.ChildNodes.Where(x => x.Name == "td").ToArray();
 
                 var gameweekNumber = Convert.ToInt32(n[3].InnerText.Trim().Replace("GW", "")) - 1;
-                
+
                 switch (n[1].InnerText.Trim())
                 {
                     case "Wildcard":
@@ -156,50 +159,31 @@ namespace Common.Code
                 }
             }
         }
+        public static void GetCupHistory(Player player, string html)
+        {
+            HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument();
 
-        //private static IList<Chips> GetChipsHistory(string id)
-        //{
-        //    var html = GetHtml($"https://fantasy.premierleague.com/a/entry/{id}/history");
+            // There are various options, set as needed
+            htmlDoc.OptionFixNestedTags = true;
 
-        //    HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument();
+            // filePath is a path to a file containing the html
+            htmlDoc.LoadHtml(html);
 
-        //    // There are various options, set as needed
-        //    htmlDoc.OptionFixNestedTags = true;
+            if (htmlDoc.ParseErrors != null && htmlDoc.ParseErrors.Any()) return;
 
-        //    // filePath is a path to a file containing the html
-        //    htmlDoc.LoadHtml(html);
+            var nodes =
+                htmlDoc.DocumentNode.SelectNodes("/tbody/tr");
 
-        //    if (htmlDoc.ParseErrors != null && htmlDoc.ParseErrors.Any()) return null;
+            if (nodes == null) return;
+            
+            foreach (var node in nodes)
+            {
+                var n = node.ChildNodes.Where(x => x.Name == "td").ToArray();
 
-        //    var nodes =
-        //        htmlDoc.DocumentNode.SelectNodes("//*[@id=\"ismr-event-chips\"]/div/div/div/table/tbody/tr");
+                var gameweekNumber = Convert.ToInt32(n[0].InnerText.Trim().Replace(" ", "")) - 1;
 
-        //    if (nodes == null) return null;
-
-        //    IList<Chips> chipses = new List<Chips>();
-
-        //    foreach (var node in nodes)
-        //    {
-        //        var n = node.ChildNodes.Where(x => x.Name == "td").ToArray();
-
-        //        switch (n[1].InnerText.Trim())
-        //        {
-        //            case "Wildcard":
-        //                chipses.Add(Chips.AllOutAttack);
-        //                break;
-        //            case "Bench Boost":
-        //                chipses.Add(Chips.AllOutAttack);
-        //                break;
-        //            case "All Out Attack":
-        //                chipses.Add(Chips.AllOutAttack);
-        //                break;
-        //            case "Triple Captain":
-        //                chipses.Add(Chips.AllOutAttack);
-        //                break;
-        //        }
-        //    }
-
-        //    return chipses;
-        //}
+                player.Gameweeks[gameweekNumber].Cup = true;
+            }
+        }
     }
 }
