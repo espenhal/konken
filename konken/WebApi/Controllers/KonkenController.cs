@@ -159,6 +159,7 @@ namespace WebApi.Controllers
             leagueStanding.PlayerStandings = leagueStanding.PlayerStandings.OrderBy(x => x.Points).ToList();
 
             CalculateHalfSeasonCash(leagueStanding, league);
+            CalculateCupCash(leagueStanding, league);
 
             return leagueStanding;
         }
@@ -174,10 +175,27 @@ namespace WebApi.Controllers
                 leagueStanding.PlayerStandings.Last().Cash += league.Players.Count * 62.5;
         }
         
-        ////cup TODO
-        
-        ////full season TODO
-        
+        private static void CalculateCupCash(LeagueStanding leagueStanding, League league)
+        {
+            Dictionary<string, int> playerCupAppearances = new Dictionary<string, int>();
+
+            foreach (var player in league.Players)
+            {
+                playerCupAppearances.Add(player.FplPlayerId, player.Gameweeks.Count(x => x.Cup));
+            }
+
+            int max = playerCupAppearances.Max(x => x.Value);
+
+            var playersFurthestInCup = playerCupAppearances.Where(x => x.Value == max).Select(x => x.Key).ToList();
+
+            foreach (var player in playersFurthestInCup)
+            {
+                leagueStanding.PlayerStandings.First(x => x.FplPlayerId == player).Cash += 500.0 / playersFurthestInCup.Count;
+            }
+        }
+
+        //TODO full season cash
+
         private List<int> CalculatePlayerGameweekWinners(Player player, League league)
         {
             return CalculateGameweekWinners(league).Where(x => x.FplPlayerId == player.FplPlayerId).Select(x => x.Number).ToList();
