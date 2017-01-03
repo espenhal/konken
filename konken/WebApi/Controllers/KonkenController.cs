@@ -151,6 +151,7 @@ namespace WebApi.Controllers
                     Rank = player.Gameweeks.OrderBy(x => x.Number).Last().OverallRank,
                     Cash = CalculateGameweekWinnerCash(player, league),
                     GameweeksWon = CalculatePlayerGameweekWinners(player, league),
+                    CupRounds = player.Gameweeks.Count(x => x.Cup)
                 };
 
                 leagueStanding.PlayerStandings.Add(playerStanding);
