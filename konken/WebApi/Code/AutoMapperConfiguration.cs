@@ -9,10 +9,6 @@ namespace WebApi.Code
     {
         public static void Configure()
         {
-            //var config = new MapperConfiguration(cfg =>
-            //{
-            //    cfg.CreateMap<Player, NewPlayer>();
-            //});
             var config = new MapperConfiguration(cfg =>
             {
                 cfg.AddProfile<LeagueProfile>();
@@ -28,15 +24,9 @@ namespace WebApi.Code
         public LeagueProfile()
         {
             CreateMap<LeagueEntity, League>()
-                //.ForMember(dest => dest.FplLeagueId, opt => opt.MapFrom(src => src.RowKey))
                 ;
             CreateMap<League, LeagueEntity>()
-                //.ForMember(dest => dest.RowKey, opt => opt.MapFrom(src => src.FplLeagueId))
                 ;
-            //    .ForMember(dest => dest.Id, opt => opt.UseValue(Guid.NewGuid()))
-            //    .ForMember(dest => dest.Players, opt => opt.Ignore())
-            //    ;
-            //CreateMap<UpdateLeague, League>();
         }
     }
 
@@ -45,17 +35,9 @@ namespace WebApi.Code
         public PlayerProfile()
         {
             CreateMap<PlayerEntity, Player>()
-                //.ForMember(dest => dest.FplPlayerId, opt => opt.MapFrom(src => src.RowKey))
                 ;
             CreateMap<Player, PlayerEntity>()
-                //.ForMember(dest => dest.RowKey, opt => opt.MapFrom(src => src.FplPlayerId))
                 ;
-            //    
-            //    ;
-            //CreateMap<Player, GameWeekEntity>()
-            //    .ForMember(dest => dest.PartitionKey, opt => opt.Ignore())
-            //    .ForMember(dest => dest.RowKey, opt => opt.MapFrom(src => src.FplPlayerId))
-            //    ;
         }
     }
 
@@ -64,15 +46,42 @@ namespace WebApi.Code
         public GameweekProfile()
         {
             CreateMap<GameweekEntity, Gameweek>()
-                //.ForMember(dest => dest.Number, opt => opt.MapFrom(src => src.RowKey))
+                .ForMember(dest => dest.Cup, opt => opt.ResolveUsing<GameweekCupResolver>())
                 ;
             CreateMap<Gameweek, GameweekEntity>()
-                //.ForMember(dest => dest.RowKey, opt => opt.MapFrom(src => src.Number))
+                .ForMember(dest => dest.HomeFplPlayerId, opt => opt.MapFrom(src => src.Cup.HomeFplPlayerId))
+                .ForMember(dest => dest.HomeName, opt => opt.MapFrom(src => src.Cup.HomeName))
+                .ForMember(dest => dest.HomeTeamName, opt => opt.MapFrom(src => src.Cup.HomeTeamName))
+                .ForMember(dest => dest.HomePoints, opt => opt.MapFrom(src => src.Cup.HomePoints))
+                .ForMember(dest => dest.AwayFplPlayerId, opt => opt.MapFrom(src => src.Cup.AwayFplPlayerId))
+                .ForMember(dest => dest.AwayName, opt => opt.MapFrom(src => src.Cup.AwayName))
+                .ForMember(dest => dest.AwayTeamName, opt => opt.MapFrom(src => src.Cup.AwayTeamName))
+                .ForMember(dest => dest.AwayPoints, opt => opt.MapFrom(src => src.Cup.AwayPoints))
                 ;
-            //    .ForMember(dest => dest.Id, opt => opt.UseValue(Guid.NewGuid()))
-            //    .ForMember(dest => dest.Player, opt => opt.Ignore())
-            //    ;
-            //CreateMap<UpdateGameweek, Gameweek>();
+        }
+    }
+
+    public class GameweekCupResolver : IValueResolver<GameweekEntity, Gameweek, Cup>
+    {
+        public Cup Resolve(GameweekEntity source, Gameweek destination, Cup destMember, ResolutionContext context)
+        {
+            if (source.HomeFplPlayerId == null || source.HomeName == null || source.HomeTeamName == null ||
+                source.HomePoints == null || source.AwayFplPlayerId == null || source.AwayName == null ||
+                source.AwayTeamName == null || source.AwayPoints == null)
+                return null;
+
+            return new Cup()
+            {
+                GamewekkNumber = source.Number,
+                HomeFplPlayerId = source.HomeFplPlayerId,
+                HomeName = source.HomeName,
+                HomeTeamName = source.HomeTeamName,
+                HomePoints = source.HomePoints,
+                AwayFplPlayerId = source.AwayFplPlayerId,
+                AwayName = source.AwayName,
+                AwayTeamName = source.AwayTeamName,
+                AwayPoints = source.AwayPoints
+            };
         }
     }
 }

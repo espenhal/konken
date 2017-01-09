@@ -59,6 +59,15 @@ namespace WebApi.Models
         public int GameweekRank { get; set; }
         public int OverallRank { get; set; }
         public int ScoredGoals { get; set; }
-        public bool Cup { get; set; }
+
+        //Cup
+        public string HomeFplPlayerId { get; set; }
+        public string HomeName { get; set; }
+        public string HomeTeamName { get; set; }
+        public int? HomePoints { get; set; }
+        public string AwayFplPlayerId { get; set; }
+        public string AwayName { get; set; }
+        public string AwayTeamName { get; set; }
+        public int? AwayPoints { get; set; }
     }
 }

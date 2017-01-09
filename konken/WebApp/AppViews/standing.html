@@ -6,6 +6,7 @@
                 <th>#</th>
                 <th>Navn</th> <!--style="cursor: pointer;" ng-click="OrderBy('TeamName')">Navn&nbsp;<span ng-show="orderByProp === 'TeamName'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>-->
                 <th style="cursor: pointer;" ng-click="OrderBy('Cash')">$&nbsp;<span ng-show="orderByProp === 'Cash'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>
+                <th style="cursor: pointer;" ng-click="OrderBy('CupRounds')">Cup&nbsp;<span ng-show="orderByProp === 'CupRounds'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>
                 <th style="cursor: pointer;" ng-click="OrderBy('GameweeksWon')">Runder&nbsp;<span ng-show="orderByProp === 'GameweeksWon'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>
                 <th style="cursor: pointer;" ng-click="OrderBy('Chips')">Chips&nbsp;<span ng-show="orderByProp === 'Chips'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>
                 <th style="cursor: pointer;" ng-click="OrderBy('Points')">Poing&nbsp;<span ng-show="orderByProp === 'Points'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>
@@ -24,6 +25,7 @@
                     <span class="standing-teamname" ng-bind="player.TeamName"></span><br /><span ng-bind="player.Name"></span>
                 </td>
                 <td><span ng-bind="player.Cash"></span></td>
+                <td><span ng-bind="player.CupRounds"></span></td>
                 <td class="won">
                     <span ng-repeat="won in player.GameweeksWon" ng-bind="won"></span>
                 </td>

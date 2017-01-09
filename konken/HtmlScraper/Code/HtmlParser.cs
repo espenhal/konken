@@ -140,21 +140,21 @@ namespace Common.Code
             {
                 var n = node.ChildNodes.Where(x => x.Name == "td").ToArray();
 
-                var gameweekNumber = Convert.ToInt32(n[3].InnerText.Trim().Replace("GW", "")) - 1;
+                var arrayIndexGameweekNumber = Convert.ToInt32(n[3].InnerText.Trim().Replace("GW", "")) - 1;
 
                 switch (n[1].InnerText.Trim())
                 {
                     case "Wildcard":
-                        player.Gameweeks[gameweekNumber].Chip = Chip.Wildcard;
+                        player.Gameweeks[arrayIndexGameweekNumber].Chip = Chip.Wildcard;
                         break;
                     case "Bench Boost":
-                        player.Gameweeks[gameweekNumber].Chip = Chip.BenchBoost;
+                        player.Gameweeks[arrayIndexGameweekNumber].Chip = Chip.BenchBoost;
                         break;
                     case "All Out Attack":
-                        player.Gameweeks[gameweekNumber].Chip = Chip.AllOutAttack;
+                        player.Gameweeks[arrayIndexGameweekNumber].Chip = Chip.AllOutAttack;
                         break;
                     case "Triple Captain":
-                        player.Gameweeks[gameweekNumber].Chip = Chip.TripleCaptain;
+                        player.Gameweeks[arrayIndexGameweekNumber].Chip = Chip.TripleCaptain;
                         break;
                 }
             }
@@ -175,15 +175,61 @@ namespace Common.Code
                 htmlDoc.DocumentNode.SelectNodes("/tbody/tr");
 
             if (nodes == null) return;
-            
+
             foreach (var node in nodes)
             {
-                var n = node.ChildNodes.Where(x => x.Name == "td").ToArray();
+                HtmlNode[] n = node.ChildNodes.Where(x => x.Name == "td").ToArray();
 
-                var gameweekNumber = Convert.ToInt32(n[0].InnerText.Trim().Replace(" ", "")) - 1;
+                var gameweekNumber = Convert.ToInt32(n[0].InnerText.Trim().Replace(" ", ""));
 
-                player.Gameweeks[gameweekNumber].Cup = true;
+                if (gameweekNumber > player.Gameweeks.Count)
+                    break;
+
+                var homeName = n[1].ChildNodes[1].ChildNodes[3].InnerText.Trim();
+                var homeTeamName = n[1].ChildNodes[1].ChildNodes[1].InnerText.Trim();
+                var homeFplPlayerId = GetFplPlayerIdCup(n, gameweekNumber);
+                var homePointsString = n[2].InnerText.Trim().Split('-')[0];
+
+                var awayName = n[3].ChildNodes[1].ChildNodes[3].InnerText.Trim();
+                var awayTeamName = n[3].ChildNodes[1].ChildNodes[1].InnerText.Trim();
+                var awayFplPlayerId = GetFplPlayerIdCup(n, gameweekNumber, true);
+                var awayPointsString = n[2].InnerText.Trim().Split('-')[1];
+
+                if (string.IsNullOrEmpty(homeName) || string.IsNullOrEmpty(homeTeamName) || string.IsNullOrEmpty(homeFplPlayerId)
+                    || string.IsNullOrEmpty(awayName) || string.IsNullOrEmpty(awayTeamName) || string.IsNullOrEmpty(awayFplPlayerId)) continue;
+
+                int homePoints = 0, awayPoints = 0;
+
+                var cup = new Cup()
+                {
+                    GamewekkNumber = gameweekNumber,
+                    HomeName = homeName,
+                    HomeTeamName = homeTeamName,
+                    HomeFplPlayerId = homeFplPlayerId,
+                    HomePoints = (int.TryParse(homePointsString, out homePoints)) ? homePoints : (int?)null,
+                    AwayName = awayName,
+                    AwayTeamName = awayTeamName,
+                    AwayFplPlayerId = awayFplPlayerId,
+                    AwayPoints = (int.TryParse(awayPointsString, out awayPoints)) ? awayPoints : (int?)null,
+                };
+
+                player.Gameweeks[gameweekNumber - 1].Cup = cup;
+
+                //var n = node.ChildNodes.Where(x => x.Name == "td").ToArray();
+                //var gameweekNumber = Convert.ToInt32(n[0].InnerText.Trim().Replace(" ", "")) - 1;
+                //player.Gameweeks[gameweekNumber].Cup = true;
             }
+        }
+
+        private static string GetFplPlayerIdCup(HtmlNode[] n, int gameweekNumber, bool away = false)
+        {
+            var playerLink = n[(away) ? 3 : 1].ChildNodes.FirstOrDefault(
+                x =>
+                    x.Name == "a" && x.HasAttributes &&
+                    !string.IsNullOrEmpty(x.GetAttributeValue("href", string.Empty)))?
+                .Attributes.FirstOrDefault(x => x.Name.Equals("href"))?.Value;
+
+            return playerLink?.Replace("/a/team/", "").Replace($"/event/{gameweekNumber}", "");
         }
     }
 }

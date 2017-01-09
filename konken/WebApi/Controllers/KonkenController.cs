@@ -100,6 +100,16 @@ namespace WebApi.Controllers
                     gameweekEntity.FplPlayerId = player.FplPlayerId;
                     gameweekEntity.FplLeagueId = league.FplLeagueId;
 
+                    //gameweekEntity.HomeFplPlayerId = gameweek.Cup.HomeFplPlayerId;
+                    //gameweekEntity.HomeName = gameweek.Cup.HomeName;
+                    //gameweekEntity.HomeTeamName = gameweek.Cup.HomeTeamName;
+                    //gameweekEntity.HomePoints = gameweek.Cup.HomePoints;
+                    
+                    //gameweekEntity.AwayFplPlayerId = gameweek.Cup.AwayFplPlayerId;
+                    //gameweekEntity.AwayName = gameweek.Cup.AwayName;
+                    //gameweekEntity.AwayTeamName = gameweek.Cup.AwayTeamName;
+                    //gameweekEntity.AwayPoints = gameweek.Cup.AwayPoints;
+
                     gameweekBatchInsertOrReplaceOperation.InsertOrReplace(gameweekEntity);
                 }
 
@@ -151,12 +161,13 @@ namespace WebApi.Controllers
                     Rank = player.Gameweeks.OrderBy(x => x.Number).Last().OverallRank,
                     Cash = CalculateGameweekWinnerCash(player, league),
                     GameweeksWon = CalculatePlayerGameweekWinners(player, league),
-                    CupRounds = player.Gameweeks.Count(x => x.Cup)
+                    CupRounds = player.Gameweeks.Count(x => x.Cup != null)
                 };
 
                 leagueStanding.PlayerStandings.Add(playerStanding);
             }
 
+            leagueStanding.Rounds = league.Players.First().Gameweeks.Select(x => x.Number).ToList();
             leagueStanding.PlayerStandings = leagueStanding.PlayerStandings.OrderBy(x => x.Points).ToList();
 
             CalculateHalfSeasonCash(leagueStanding, league);
@@ -182,7 +193,7 @@ namespace WebApi.Controllers
 
             foreach (var player in league.Players)
             {
-                playerCupAppearances.Add(player.FplPlayerId, player.Gameweeks.Count(x => x.Cup));
+                playerCupAppearances.Add(player.FplPlayerId, player.Gameweeks.Count(x => x.Cup != null));
             }
 
             int max = playerCupAppearances.Max(x => x.Value);

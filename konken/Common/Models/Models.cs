@@ -10,6 +10,7 @@ namespace Common.Models
         public string FplLeagueId { get; set; }
         public string Name { get; set; }
         public List<PlayerStanding> PlayerStandings { get; set; }
+        public List<int> Rounds { get; set; }
     }
 
     public class PlayerStanding
@@ -59,7 +60,7 @@ namespace Common.Models
         public int OverallRank { get; set; }
         public int PointsExcludedTransferCosts => Points - Transfers;
         public int ScoredGoals { get; set; }
-        public bool Cup { get; set; }
+        public Cup Cup { get; set; }
     }
 
     public class GameweekWinner
@@ -87,5 +88,18 @@ namespace Common.Models
         public string FplLeagueId { get; set; }
         
         public int Failures { get; set; }
+    }
+
+    public class Cup
+    {
+        public int GamewekkNumber { get; set; }
+        public string HomeFplPlayerId { get; set; }
+        public string HomeName { get; set; }
+        public string HomeTeamName { get; set; }
+        public int? HomePoints { get; set; }
+        public string AwayFplPlayerId { get; set; }
+        public string AwayName { get; set; }
+        public string AwayTeamName { get; set; }
+        public int? AwayPoints { get; set; }
     }
 }

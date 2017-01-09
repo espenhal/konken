@@ -8,13 +8,13 @@ namespace HtmlScraper.Code
     {
         public static string GetHtml(string url, string htmlElementToFind = null, bool throwErrorOnElementNotFound = true)
         {
-            string html = null;
+            string html = "";
 
             using (var driver = new PhantomJSDriver())
             {
                 try
                 {
-                    driver.Manage().Timeouts().ImplicitlyWait(new TimeSpan(0, 0, 30));
+                    driver.Manage().Timeouts().ImplicitlyWait(new TimeSpan(0, 0, 7));
 
                     driver.Navigate().GoToUrl(url);
 
@@ -45,13 +45,13 @@ namespace HtmlScraper.Code
 
         public static string GetHtmlByXPath(string url, string xpath, bool throwErrorOnElementNotFound = true)
         {
-            string html = null;
+            string html = "";
 
             using (var driver = new PhantomJSDriver())
             {
                 try
                 {
-                    driver.Manage().Timeouts().ImplicitlyWait(new TimeSpan(0, 0, 30));
+                    driver.Manage().Timeouts().ImplicitlyWait(new TimeSpan(0, 0, 7));
 
                     driver.Navigate().GoToUrl(url);
 
