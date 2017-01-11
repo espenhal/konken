@@ -134,6 +134,21 @@ namespace WebApi.Controllers
             }
         }
 
+        [HttpGet, Route("getrounds")]
+        public async Task<IHttpActionResult> GetLeagueRounds(string fplLeagueId)
+        {
+            try
+            {
+                var league = await CalculateLeague(fplLeagueId);
+                
+                return Ok(league.Players.First().Gameweeks.OrderByDescending(x => x.Number).Select(x => x.Number).ToList());
+            }
+            catch (Exception e)
+            {
+                return InternalServerError(e);
+            }
+        }
+
         private async Task<LeagueStanding> CalculateLeagueStanding(string fplLeagueId, int? round)
         {
             var league = await CalculateLeague(fplLeagueId, round);
@@ -166,8 +181,7 @@ namespace WebApi.Controllers
 
                 leagueStanding.PlayerStandings.Add(playerStanding);
             }
-
-            leagueStanding.Rounds = league.Players.First().Gameweeks.Select(x => x.Number).ToList();
+            
             leagueStanding.PlayerStandings = leagueStanding.PlayerStandings.OrderBy(x => x.Points).ToList();
 
             CalculateHalfSeasonCash(leagueStanding, league);
@@ -197,6 +211,9 @@ namespace WebApi.Controllers
             }
 
             int max = playerCupAppearances.Max(x => x.Value);
+
+            if (max == 0)
+                return;
 
             var playersFurthestInCup = playerCupAppearances.Where(x => x.Value == max).Select(x => x.Key).ToList();
 

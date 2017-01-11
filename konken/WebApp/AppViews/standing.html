@@ -1,5 +1,9 @@
 ﻿<div class="container-fluid" ng-hide="loading || error">
 
+    <select ng-model="Round" ng-options="n for n in Rounds" ng-change="ChangeRound()">
+        {{n}}
+    </select>
+
     <table class="table">
         <thead>
             <tr>

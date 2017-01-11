@@ -72,27 +72,67 @@
 
     angular
         .module("konkenModule")
+        .filter('range', function () {
+            return function (input, total) {
+                total = parseInt(total);
+
+                for (var i = 0; i < total; i++) {
+                    input.push(i);
+                }
+
+                return input;
+            };
+        });
+}());
+
+(function () {
+    "use strict";
+
+    angular
+        .module("konkenModule")
         .controller("standingController", ["$scope", "$http", "environmentService", standingController]);
 
     function standingController($scope, $http, envSvc) {
         var vm = this;
         vm.league = undefined;
+        $scope.Rounds = undefined;
+        $scope.Round = undefined;
 
         load();
 
-        function load() {
+        function load(round) {
             $scope.loading = true;
 
-            $http.get(envSvc.get("url") + "getstanding?fplLeagueId=414219")
+            var url = envSvc.get("url") + "getstanding?fplLeagueId=414219";
+
+            if (round)
+                url += "&round=" + round;
+
+            $http.get(envSvc.get("url") + "getrounds?fplLeagueId=414219")
                 .then(
                     function (response) {
-                        vm.league = response.data;
+                        $scope.Rounds = response.data;
 
-                        angular.forEach(vm.league.PlayerStandings, function (o) {
-                            o.Chips = Object.assign({}, o.Chips);
-                        });
+                        $http.get(url)
+                            .then(
+                                function (response) {
+                                    vm.league = response.data;
 
-                        $scope.loading = false;
+                                    angular.forEach(vm.league.PlayerStandings, function (o) {
+                                        o.Chips = Object.assign({}, o.Chips);
+                                    });
+
+                                    if (round)
+                                        $scope.Round = round;
+                                    else
+                                        $scope.Round = Array.max($scope.Rounds);
+
+                                    $scope.loading = false;
+                                },
+                                function (response) {
+                                    console.log(response);
+                                    $scope.error = true;
+                                });
                     },
                     function (response) {
                         console.log(response);
@@ -112,6 +152,14 @@
                 $scope.orderByReverse = (reverse) ? false : true;
             }
         }
+
+        $scope.ChangeRound = function () {
+            load($scope.Round);
+        };
+
+        Array.max = function (array) {
+            return Math.max.apply(Math, array);
+        };
     }
 }());
 

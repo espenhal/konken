@@ -10,7 +10,6 @@ namespace Common.Models
         public string FplLeagueId { get; set; }
         public string Name { get; set; }
         public List<PlayerStanding> PlayerStandings { get; set; }
-        public List<int> Rounds { get; set; }
     }
 
     public class PlayerStanding
