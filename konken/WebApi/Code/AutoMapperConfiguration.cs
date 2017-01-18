@@ -27,6 +27,8 @@ namespace WebApi.Code
                 ;
             CreateMap<League, LeagueEntity>()
                 ;
+            CreateMap<LeagueEntity, LeagueGameweek>()
+                ;
         }
     }
 
@@ -57,6 +59,8 @@ namespace WebApi.Code
                 .ForMember(dest => dest.AwayName, opt => opt.MapFrom(src => src.Cup.AwayName))
                 .ForMember(dest => dest.AwayTeamName, opt => opt.MapFrom(src => src.Cup.AwayTeamName))
                 .ForMember(dest => dest.AwayPoints, opt => opt.MapFrom(src => src.Cup.AwayPoints))
+                ;
+            CreateMap<GameweekEntity, PlayerGameweek>()
                 ;
         }
     }

@@ -11,6 +11,11 @@
                     controller: "standingController",
                     controllerAs: "vm"
                 })
+                .when("/gameweek/:number?", {
+                    templateUrl: "AppViews/gameweek.html",
+                    controller: "gameweekController",
+                    controllerAs: "vm"
+                })
                 .otherwise({
                     templateUrl: "AppViews/standing.html",
                     controller: "standingController",
@@ -72,7 +77,7 @@
 
     angular
         .module("konkenModule")
-        .filter('range', function () {
+        .filter("range", function () {
             return function (input, total) {
                 total = parseInt(total);
 
@@ -83,6 +88,92 @@
                 return input;
             };
         });
+}());
+
+(function () {
+    "use strict";
+
+    angular
+        .module("konkenModule")
+        .controller("gameweekController", ["$scope", "$http", "$routeParams", "$location", "$timeout", "environmentService", gameweekController]);
+
+    function gameweekController($scope, $http, $routeParams, $location, $timeout, envSvc) {
+        var vm = this;
+        vm.league = undefined;
+        $scope.Rounds = undefined;
+        $scope.Round = undefined;
+
+        //if ($routeParams.number) {
+        //    $scope.Round = $routeParams.number;
+        //    load();
+        //}
+
+        loadRounds();
+
+        function loadRounds() {
+            $scope.loading = true;
+
+            $http.get(envSvc.get("url") + "getrounds?fplLeagueId=414219")
+                .then(
+                    function (responseRounds) {
+                        $scope.Rounds = responseRounds.data;
+
+                        if (!$scope.Round) {
+                            $scope.Round = Array.max($scope.Rounds);
+                            load();
+                        }
+
+                        $scope.loading = false;
+                    },
+                    function (responseRoundsError) {
+                        console.log(responseRoundsError);
+                        $scope.error = true;
+                    });
+        };
+
+        function load() {
+            $scope.loading = true;
+
+            if ($scope.Round) {
+                var url = envSvc.get("url") + "getgameweek?fplLeagueId=414219&round=" + $scope.Round;
+
+                $http.get(url)
+                    .then(
+                        function (responseRound) {
+                            vm.league = responseRound.data;
+                            $scope.loading = false;
+                        },
+                        function (responseRoundError) {
+                            console.log(responseRoundError);
+                            $scope.error = true;
+                        });
+            } else {
+                $scope.loading = false;
+            }
+        };
+
+        $scope.orderByProp = "Points";
+        $scope.orderByReverse = true;
+
+        $scope.OrderBy = function (prop, reverse) {
+            //orderByProp = 'Transfers'; orderByReverse = !orderByReverse
+            if ($scope.orderByProp === prop) {
+                $scope.orderByReverse = !$scope.orderByReverse;
+            } else {
+                $scope.orderByProp = prop;
+                $scope.orderByReverse = (reverse) ? false : true;
+            }
+        }
+
+        $scope.ChangeRound = function () {
+            //$location.path("/gameweek/" + $scope.Round);
+            load();
+        };
+
+        Array.max = function (array) {
+            return Math.max.apply(Math, array);
+        };
+    }
 }());
 
 (function () {

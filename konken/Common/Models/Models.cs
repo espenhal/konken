@@ -62,6 +62,40 @@ namespace Common.Models
         public Cup Cup { get; set; }
     }
 
+    public class LeagueGameweek
+    {
+        public string FplLeagueId { get; set; }
+        public string Name { get; set; }
+        public List<PlayerGameweek> PlayerGameweeks { get; set; }
+    }
+
+    public class PlayerGameweek
+    {
+        public string FplPlayerId { get; set; }
+        public string Name { get; set; }
+        public string TeamName { get; set; }
+        public int Number { get; set; }
+        public int Points { get; set; }
+        public int PointsOnBench { get; set; }
+        public int OverallPoints { get; set; }
+        public int Transfers { get; set; }
+        public int TransferCosts { get; set; }
+        public Chip Chip { get; set; }
+        public double Value { get; set; }
+        public int GameweekRank { get; set; }
+        public int OverallRank { get; set; }
+        public int PointsExcludedTransferCosts => Points - Transfers;
+        public int ScoredGoals { get; set; }
+        public string HomeFplPlayerId { get; set; }
+        public string HomeName { get; set; }
+        public string HomeTeamName { get; set; }
+        public int? HomePoints { get; set; }
+        public string AwayFplPlayerId { get; set; }
+        public string AwayName { get; set; }
+        public string AwayTeamName { get; set; }
+        public int? AwayPoints { get; set; }
+    }
+
     public class GameweekWinner
     {
         public int Number { get; set; }

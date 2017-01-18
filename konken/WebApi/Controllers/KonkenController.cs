@@ -104,7 +104,7 @@ namespace WebApi.Controllers
                     //gameweekEntity.HomeName = gameweek.Cup.HomeName;
                     //gameweekEntity.HomeTeamName = gameweek.Cup.HomeTeamName;
                     //gameweekEntity.HomePoints = gameweek.Cup.HomePoints;
-                    
+
                     //gameweekEntity.AwayFplPlayerId = gameweek.Cup.AwayFplPlayerId;
                     //gameweekEntity.AwayName = gameweek.Cup.AwayName;
                     //gameweekEntity.AwayTeamName = gameweek.Cup.AwayTeamName;
@@ -140,13 +140,111 @@ namespace WebApi.Controllers
             try
             {
                 var league = await CalculateLeague(fplLeagueId);
-                
+
                 return Ok(league.Players.First().Gameweeks.OrderByDescending(x => x.Number).Select(x => x.Number).ToList());
             }
             catch (Exception e)
             {
                 return InternalServerError(e);
             }
+        }
+
+        [HttpGet, Route("getgameweek")]
+        public async Task<IHttpActionResult> GetGameweekStanding(string fplLeagueId, int round)
+        {
+            try
+            {
+                return Ok(await CalculateLeagueGameweek(fplLeagueId, round));
+            }
+            catch (Exception e)
+            {
+                return InternalServerError(e);
+            }
+        }
+
+        #region private parts
+
+        private async Task<LeagueGameweek> CalculateLeagueGameweek(string fplLeagueId, int round)
+        {
+            TableOperation retrieveLeagueOperation = TableOperation.Retrieve<LeagueEntity>("League", fplLeagueId);
+
+            TableResult retrieveLeagueResult = await Table.ExecuteAsync(retrieveLeagueOperation);
+
+            LeagueGameweek leagueGameweek = Mapper.Map<LeagueEntity, LeagueGameweek>((LeagueEntity)retrieveLeagueResult.Result);
+
+            if (leagueGameweek != null)
+            {
+                TableQuery<PlayerEntity> playerTableQuery =
+                    new TableQuery<PlayerEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey",
+                        QueryComparisons.Equal, "Player"));
+
+                TableQuerySegment<PlayerEntity> playerEntities =
+                    await Table.ExecuteQuerySegmentedAsync(playerTableQuery, new TableContinuationToken());
+
+                var partitionKeyFilter = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal,
+                    "Gameweek");
+                string gameweekNumberFilter = TableQuery.GenerateFilterConditionForInt("Number", QueryComparisons.Equal,
+                    round);
+
+                TableQuery<GameweekEntity> gameweekTableQuery =
+                    new TableQuery<GameweekEntity>().Where(TableQuery.CombineFilters(partitionKeyFilter,
+                        TableOperators.And, gameweekNumberFilter));
+
+                TableQuerySegment<GameweekEntity> gameweeksEntities =
+                    await Table.ExecuteQuerySegmentedAsync(gameweekTableQuery, new TableContinuationToken());
+
+                leagueGameweek.PlayerGameweeks = Mapper.Map<List<GameweekEntity>, List<PlayerGameweek>>(gameweeksEntities.Results);
+
+                foreach (var playerGameweek in leagueGameweek.PlayerGameweeks)
+                {
+                    playerGameweek.Name =
+                        playerEntities.Results.First(x => x.FplPlayerId == playerGameweek.FplPlayerId).Name;
+                    playerGameweek.TeamName =
+                        playerEntities.Results.First(x => x.FplPlayerId == playerGameweek.FplPlayerId).TeamName;
+                }
+            }
+            return leagueGameweek;
+        }
+        private async Task<League> CalculateLeague(string fplLeagueId, int? round = null)
+        {
+            TableOperation retrieveLeagueOperation = TableOperation.Retrieve<LeagueEntity>("League", fplLeagueId);
+
+            TableResult retrieveLeagueResult = await Table.ExecuteAsync(retrieveLeagueOperation);
+
+            League league = Mapper.Map<LeagueEntity, League>((LeagueEntity)retrieveLeagueResult.Result);
+
+            if (league != null)
+            {
+                TableQuery<PlayerEntity> playerTableQuery =
+                    new TableQuery<PlayerEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey",
+                        QueryComparisons.Equal, "Player"));
+
+                TableQuerySegment<PlayerEntity> playerEntities =
+                    await Table.ExecuteQuerySegmentedAsync(playerTableQuery, new TableContinuationToken());
+
+                TableQuery<GameweekEntity> gameweekTableQuery =
+                    new TableQuery<GameweekEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey",
+                        QueryComparisons.Equal, "Gameweek"));
+
+                TableQuerySegment<GameweekEntity> gameweeksEntities =
+                    await Table.ExecuteQuerySegmentedAsync(gameweekTableQuery, new TableContinuationToken());
+
+                league.Players = Mapper.Map<List<PlayerEntity>, List<Player>>(playerEntities.Results);
+
+                foreach (var player in league.Players)
+                {
+                    player.Gameweeks =
+                        Mapper.Map<List<GameweekEntity>, List<Gameweek>>(
+                            gameweeksEntities.Results.Where(
+                                x => x.FplLeagueId == fplLeagueId && x.FplPlayerId == player.FplPlayerId).ToList());
+
+                    if (round == null)
+                        round = player.Gameweeks.Count;
+
+                    player.Gameweeks = player.Gameweeks.Where(x => x.Number <= round).OrderBy(x => x.Number).ToList();
+                }
+            }
+            return league;
         }
 
         private async Task<LeagueStanding> CalculateLeagueStanding(string fplLeagueId, int? round)
@@ -181,7 +279,7 @@ namespace WebApi.Controllers
 
                 leagueStanding.PlayerStandings.Add(playerStanding);
             }
-            
+
             leagueStanding.PlayerStandings = leagueStanding.PlayerStandings.OrderBy(x => x.Points).ToList();
 
             CalculateHalfSeasonCash(leagueStanding, league);
@@ -200,7 +298,7 @@ namespace WebApi.Controllers
             if (league.Players.First().Gameweeks.Count >= 20)
                 leagueStanding.PlayerStandings.Last().Cash += league.Players.Count * 62.5;
         }
-        
+
         private static void CalculateCupCash(LeagueStanding leagueStanding, League league)
         {
             Dictionary<string, int> playerCupAppearances = new Dictionary<string, int>();
@@ -309,46 +407,6 @@ namespace WebApi.Controllers
             return gameweekWinners;
         }
 
-        private async Task<League> CalculateLeague(string fplLeagueId, int? round = null)
-        {
-            TableOperation retrieveLeagueOperation = TableOperation.Retrieve<LeagueEntity>("League", fplLeagueId);
-
-            TableResult retrieveLeagueResult = await Table.ExecuteAsync(retrieveLeagueOperation);
-
-            League league = Mapper.Map<LeagueEntity, League>((LeagueEntity)retrieveLeagueResult.Result);
-
-            if (league != null)
-            {
-                TableQuery<PlayerEntity> playerTableQuery =
-                    new TableQuery<PlayerEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey",
-                        QueryComparisons.Equal, "Player"));
-
-                TableQuerySegment<PlayerEntity> playerEntities =
-                    await Table.ExecuteQuerySegmentedAsync(playerTableQuery, new TableContinuationToken());
-
-                TableQuery<GameweekEntity> gameweekTableQuery =
-                    new TableQuery<GameweekEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey",
-                        QueryComparisons.Equal, "Gameweek"));
-
-                TableQuerySegment<GameweekEntity> gameweeksEntities =
-                    await Table.ExecuteQuerySegmentedAsync(gameweekTableQuery, new TableContinuationToken());
-
-                league.Players = Mapper.Map<List<PlayerEntity>, List<Player>>(playerEntities.Results);
-
-                foreach (var player in league.Players)
-                {
-                    player.Gameweeks =
-                        Mapper.Map<List<GameweekEntity>, List<Gameweek>>(
-                            gameweeksEntities.Results.Where(
-                                x => x.FplLeagueId == fplLeagueId && x.FplPlayerId == player.FplPlayerId).ToList());
-
-                    if (round == null)
-                        round = player.Gameweeks.Count;
-
-                    player.Gameweeks = player.Gameweeks.Where(x => x.Number <= round).OrderBy(x => x.Number).ToList();
-                }
-            }
-            return league;
-        }
+        #endregion
     }
 }
