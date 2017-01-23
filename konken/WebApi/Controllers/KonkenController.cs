@@ -59,7 +59,11 @@ namespace WebApi.Controllers
         {
             try
             {
-                return Ok(await CalculateLeague(fplLeagueId, round));
+                var league = await CalculateLeague(fplLeagueId, round);
+
+                league.Players = league.Players.OrderByDescending(x => x.Gameweeks.Sum(y => y.OverallPoints)).ToList();
+
+                return Ok(league);
             }
             catch (Exception e)
             {
@@ -126,7 +130,11 @@ namespace WebApi.Controllers
         {
             try
             {
-                return Ok(await CalculateLeagueStanding(fplLeagueId, round));
+                var leagueStanding = await CalculateLeagueStanding(fplLeagueId, round);
+
+                leagueStanding.PlayerStandings = leagueStanding.PlayerStandings.OrderByDescending(x => x.Points).ToList();
+
+                return Ok(leagueStanding);
             }
             catch (Exception e)
             {

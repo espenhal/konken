@@ -21,7 +21,8 @@
                     controller: "indexController",
                     controllerAs: "vm"
                 });
-        }]);
+        }])
+        .value("_", window._);
 }());
 
 (function () {
@@ -29,9 +30,9 @@
 
     angular
         .module("konkenModule")
-        .controller("indexController", ["$scope", "$http", "environmentService", indexController]);
+        .controller("indexController", ["$scope", "$http", "environmentService", "_", indexController]);
 
-    function indexController($scope, $http, envSvc) {
+    function indexController($scope, $http, envSvc, _) {
         var vm = this;
         vm.league = undefined;
         $scope.Rounds = undefined;
@@ -46,12 +47,16 @@
 
             $http.get(url)
                 .then(
-                    function (responseRound) {
-                        vm.league = responseRound.data;
+                    function (responseIndex) {
+                        vm.league = responseIndex.data;
+
+                        $scope.leaderPoints = vm.league.PlayerStandings;
+                        $scope.leaderCash = _.sortBy(vm.league.PlayerStandings, ["Cash"]).reverse();
+
                         $scope.loading = false;
                     },
-                    function (responseRoundError) {
-                        console.log(responseRoundError);
+                    function (responseIndexError) {
+                        console.log(responseIndexError);
                         $scope.error = true;
                     });
         };
@@ -175,8 +180,8 @@
 
                                     $scope.loading = false;
                                 },
-                                function (response) {
-                                    console.log(response);
+                                function (responseError) {
+                                    console.log(responseError);
                                     $scope.error = true;
                                 });
                     },
@@ -200,7 +205,6 @@
         }
 
         $scope.ChangeRound = function (round) {
-            console.log(round)
             $scope.Round = round;
             load();
         };

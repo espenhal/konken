@@ -1,1 +1,37 @@
-﻿<pre ng-bind="vm | json"></pre>
+﻿<div class="container-fluid" ng-hide="loading || error">
+    <div>
+        <i class="glyphicon glyphicon-star"></i>
+        <div>
+            1&nbsp;<span ng-bind="leaderPoints[0].TeamName"></span> <span ng-bind="leaderPoints[0].Name"></span>
+        </div>
+        <div>
+            2&nbsp;<span ng-bind="leaderPoints[1].TeamName"></span> <span ng-bind="leaderPoints[1].Name"></span>
+        </div>
+        <div>
+            3&nbsp;<span ng-bind="leaderPoints[2].TeamName"></span> <span ng-bind="leaderPoints[2].Name"></span>
+        </div>
+    </div>
+    <div>
+        <i class="glyphicon glyphicon-usd"></i>
+        <div>
+            1&nbsp;<span ng-bind="leaderCash[0].TeamName"></span> <span ng-bind="leaderCash[0].Name"></span>
+        </div>
+        <div>
+            2&nbsp;<span ng-bind="leaderCash[1].TeamName"></span> <span ng-bind="leaderCash[1].Name"></span>
+        </div>
+        <div>
+            3&nbsp;<span ng-bind="leaderCash[2].TeamName"></span> <span ng-bind="leaderCash[2].Name"></span>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid cover" ng-show="loading && !error">
+    LASTER...
+</div>
+
+<div class="container-fluid" class="error" ng-show="error">
+    <!--Feil. Dette kan ta tid. Drikk øl og se noen episoder av Days Of Our Lives...-->
+    <!--Oi, hva skjedde?-->
+    <!--Faen, måtte du? Nå ødela du alt! ALT!!-->
+    Jeg er ikke sint. Bare veldig, veldig skuffet...
+</div>
