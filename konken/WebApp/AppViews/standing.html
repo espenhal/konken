@@ -1,8 +1,16 @@
 ﻿<div class="container-fluid" ng-hide="loading || error">
 
-    <select ng-model="Round" ng-options="n for n in Rounds" ng-change="ChangeRound()">
+    <!--<select ng-model="Round" ng-options="n for n in Rounds" ng-change="ChangeRound()">
         {{n}}
-    </select>
+    </select>-->
+
+    <div class="btn-toolbar">
+        <div class="btn-group">
+            <button class="btn btn-default" ng-class="{'oh-yes':round <= Round}" ng-repeat="round in Rounds" ng-click="ChangeRound(round)">
+                {{round}}&nbsp;<i ng-if="round <= Round" class="glyphicon glyphicon-ok"></i>
+            </button>
+        </div>
+    </div>
 
     <table class="table">
         <thead>

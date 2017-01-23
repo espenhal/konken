@@ -154,7 +154,16 @@ namespace WebApi.Controllers
         {
             try
             {
-                return Ok(await CalculateLeagueGameweek(fplLeagueId, round));
+                LeagueGameweek league = await CalculateLeagueGameweek(fplLeagueId, round);
+
+                var gameweek =
+                    league.PlayerGameweeks.OrderByDescending(x => x.Points)
+                        .ThenByDescending(x => x.PointsOnBench)
+                        .ThenByDescending(x => x.ScoredGoals)
+                        .ToList();
+
+                return
+                    Ok(gameweek);
             }
             catch (Exception e)
             {

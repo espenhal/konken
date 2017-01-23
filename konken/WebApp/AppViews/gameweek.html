@@ -1,68 +1,31 @@
 ﻿<div class="container-fluid" ng-hide="loading || error">
 
-    <select ng-model="Round" ng-options="n for n in Rounds" ng-change="ChangeRound()">
-        
-    </select>
+    <div class="btn-toolbar">
+        <div class="btn-group">
+            <button class="btn btn-default" ng-repeat="round in Rounds" ng-click="ChangeRound(round)">
+                {{round}}&nbsp;<i ng-if="round === Round" class="glyphicon glyphicon-ok"></i>
+            </button>
+        </div>
+    </div>
 
     <table class="table">
         <thead>
             <tr>
-
-                <!--
-                "Gameweeks": [
-                  {
-                    "Number": 18,
-                    "Points": 83,
-                    "PointsOnBench": 9,
-                    "OverallPoints": 904,
-                    "Transfers": 0,
-                    "TransferCosts": 0,
-                    "Chip": "None",
-                    "Value": 99.7,
-                    "GameweekRank": 82582,
-                    "OverallRank": 635788,
-                    "PointsExcludedTransferCosts": 83,
-                    "ScoredGoals": 0,
-                    "Cup": {
-                      "GamewekkNumber": 18,
-                      "HomeFplPlayerId": "1202701",
-                      "HomeName": "Terje Monssen",
-                      "HomeTeamName": "Mons United",
-                      "HomePoints": 83,
-                      "AwayFplPlayerId": "401068",
-                      "AwayName": "Fahad Munshi",
-                      "AwayTeamName": "FM",
-                      "AwayPoints": 50
-                    }
-                  }
-                ]
-                -->
-
                 <th>#</th>
-                <th>Navn</th> <!--style="cursor: pointer;" ng-click="OrderBy('TeamName')">Navn&nbsp;<span ng-show="orderByProp === 'TeamName'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>-->
-                <th style="cursor: pointer;" ng-click="OrderBy('pGw.Points')">Poing&nbsp;<span ng-show="orderByProp === 'pGw.Points'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>
-
-                
-                <!--<th style="cursor: pointer;" ng-click="OrderBy('Cash')">$&nbsp;<span ng-show="orderByProp === 'Cash'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>
-                <th style="cursor: pointer;" ng-click="OrderBy('CupRounds')">Cup&nbsp;<span ng-show="orderByProp === 'CupRounds'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>
-                <th style="cursor: pointer;" ng-click="OrderBy('GameweeksWon')">Runder&nbsp;<span ng-show="orderByProp === 'GameweeksWon'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>
-                <th style="cursor: pointer;" ng-click="OrderBy('Chips')">Chips&nbsp;<span ng-show="orderByProp === 'Chips'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>
-                
-                <th style="cursor: pointer;" ng-click="OrderBy('PointsOnBench')">Benk&nbsp;<span ng-show="orderByProp === 'PointsOnBench'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>
-                <th style="cursor: pointer;" ng-click="OrderBy('Transfers')">Bytter&nbsp;<span ng-show="orderByProp === 'Transfers'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>
-                <th style="cursor: pointer;" ng-click="OrderBy('TransferCosts')">Gebyr&nbsp;<span ng-show="orderByProp === 'TransferCosts'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>
-                <th style="cursor: pointer;" ng-click="OrderBy('PointsTransferCostsExcluded')">Brutto&nbsp;<span ng-show="orderByProp === 'PointsTransferCostsExcluded'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>
-                <th style="cursor: pointer;" ng-click="OrderBy('Value')">£&nbsp;<span ng-show="orderByProp === 'Value'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>
-                <th style="cursor: pointer;" ng-click="OrderBy('Rank', true)">FPL#&nbsp;<span ng-show="orderByProp === 'Rank'"><i class="glyphicon glyphicon-sort-by-attributes" ng-show="!orderByReverse"></i><i class="glyphicon glyphicon-sort-by-attributes-alt" ng-show="orderByReverse"></i></span></th>-->
+                <th>Navn</th>
+                <th>Poing</th>
+                <th>Benk</th>
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="pGw in vm.league.PlayerGameweeks | orderBy: orderByProp:orderByReverse">
+            <tr ng-repeat="gw in vm.gameweek">
                 <td ng-bind="$index + 1"></td>
                 <td>
-                    <span class="standing-teamname" ng-bind="pGw.TeamName"></span><br/><span ng-bind="pGw.Name"></span>
+                    <span class="standing-teamname" ng-bind="gw.TeamName"></span><br /><span ng-bind="gw.Name"></span>
                 </td>
-                <td ng-bind="pGw.Points"></td>
+                <td ng-bind="gw.Points"></td>
+                <td ng-bind="gw.PointsOnBench"></td>
+
                 <!--<td><span ng-bind="player.Cash"></span></td>
                 <td><span ng-bind="player.CupRounds"></span></td>
                 <td class="won">
@@ -74,8 +37,7 @@
                         <span class="" ng-bind="chip"></span>
                     </span>
                 </td>
-                
-                <td ng-bind="player.PointsOnBench"></td>
+
                 <td ng-bind="player.Transfers"></td>
                 <td ng-bind="player.TransferCosts"></td>
                 <td ng-bind="player.PointsTransferCostsExcluded"></td>
@@ -98,7 +60,5 @@
 </div>
 
 <div class="container-fluid">
-    <pre>{{Round}}</pre>
-    <pre>{{Rounds}}</pre>
     <pre>{{vm | json}}</pre>
 </div>

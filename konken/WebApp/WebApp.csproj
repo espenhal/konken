@@ -116,6 +116,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AppViews\gameweek.html" />
+    <Content Include="AppViews\index.html" />
     <Content Include="AppViews\standing.html" />
     <Content Include="App\app.js" />
     <Content Include="Content\favicons\apple-touch-icon.png" />
