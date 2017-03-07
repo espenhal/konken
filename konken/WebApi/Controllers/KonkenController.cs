@@ -165,7 +165,7 @@ namespace WebApi.Controllers
                 LeagueGameweek league = await CalculateLeagueGameweek(fplLeagueId, round);
 
                 var gameweek =
-                    league.PlayerGameweeks.OrderByDescending(x => x.Points)
+                    league.PlayerGameweeks.OrderByDescending(x => x.PointsExcludedTransferCosts)
                         .ThenByDescending(x => x.PointsOnBench)
                         .ThenByDescending(x => x.ScoredGoals)
                         .ToList();
