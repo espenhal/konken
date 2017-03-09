@@ -15,35 +15,23 @@
                 <th>Navn</th>
                 <th>Poing</th>
                 <th>Benk</th>
+                <th>Bytter</th>
+                <th>Gebyr</th>
+                <th>Brutto</th>
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="gw in vm.gameweek">
-                <td ng-bind="$index + 1"></td>
-                <td>
-                    <span class="standing-teamname" ng-bind="gw.TeamName"></span><br /><span ng-bind="gw.Name"></span>
-                </td>
-                <td ng-bind="gw.Points"></td>
-                <td ng-bind="gw.PointsOnBench"></td>
-
-                <!--<td><span ng-bind="player.Cash"></span></td>
-                <td><span ng-bind="player.CupRounds"></span></td>
-                <td class="won">
-                    <span ng-repeat="won in player.GameweeksWon" ng-bind="won"></span>
-                </td>
-                <td class="chip">
-                    <span class="chip" ng-repeat="chip in player.Chips" ng-hide="chip === 'None'">
-                        <span class="gwnumber" ng-bind="$index + 1"></span>
-                        <span class="" ng-bind="chip"></span>
-                    </span>
-                </td>
-
-                <td ng-bind="player.Transfers"></td>
-                <td ng-bind="player.TransferCosts"></td>
-                <td ng-bind="player.PointsTransferCostsExcluded"></td>
-                <td ng-bind="player.Value"></td>
-                <td ng-bind="player.Rank"></td>-->
-            </tr>
+        <tr ng-repeat="gw in vm.gameweek">
+            <td ng-bind="$index + 1"></td>
+            <td>
+                <span class="standing-teamname" ng-bind="gw.TeamName"></span><br/><span ng-bind="gw.Name"></span>
+            </td>
+            <td ng-bind="gw.PointsExcludedTransferCosts"></td>
+            <td ng-bind="gw.PointsOnBench"></td>
+            <td ng-bind="gw.Transfers"></td>
+            <td ng-bind="gw.TransferCosts"></td>
+            <td ng-bind="gw.Points"></td>
+        </tr>
         </tbody>
     </table>
 </div>
