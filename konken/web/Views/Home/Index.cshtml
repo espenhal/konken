@@ -1,13 +1,10 @@
 ﻿@model common.LeagueStanding
 
 @{
-    ViewBag.Title = "Home Page";
+    ViewBag.Title = "Hjem";
 }
 
 <div class="jumbotron">
-    <h1>Le Konk</h1>
-    <p class="lead">17/18</p>
-    
     @foreach (var player in Model.PlayerStandings)
     {
         <div>@player.Name <strong>@player.TeamName</strong></div>

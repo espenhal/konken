@@ -21,5 +21,10 @@ namespace web.Controllers
 
 			return View(leagueStanding);
 		}
+
+		public ActionResult Rules()
+		{
+			return View();
+		}
 	}
 }
