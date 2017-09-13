@@ -69,32 +69,7 @@ namespace common
 		public string AwayTeamName { get; set; }
 		public int? AwayPoints { get; set; }
 	}
-
-	//public class LeagueStanding
-	//{
-	//	public string FplLeagueId { get; set; }
-	//	public string Name { get; set; }
-	//	public List<PlayerStanding> PlayerStandings { get; set; }
-	//}
-
-	//public class PlayerStanding
-	//{
-	//	public string FplPlayerId { get; set; }
-	//	public string Name { get; set; }
-	//	public string TeamName { get; set; }
-	//	public int Points { get; set; }
-	//	public int PointsOnBench { get; set; }
-	//	public int Transfers { get; set; }
-	//	public int TransferCosts { get; set; }
-	//	public int PointsTransferCostsExcluded { get; set; }
-	//	public List<Chip> Chips { get; set; }
-	//	public double Value { get; set; }
-	//	public int Rank { get; set; }
-	//	public double Cash { get; set; }
-	//	public List<int> GameweeksWon { get; set; }
-	//	public int CupRounds { get; set; }
-	//}
-
+	
 	public class League
 	{
 		public string FplLeagueId { get; set; }

@@ -1,12 +1,94 @@
-﻿@model common.LeagueStanding
+﻿@using common
+@model common.LeagueStanding
 
 @{
     ViewBag.Title = "Hjem";
 }
 
 <div class="jumbotron">
-    @foreach (var player in Model.PlayerStandings)
-    {
-        <div>@player.Name <strong>@player.TeamName</strong></div>
-    }
+    <table style="width: 100%">
+        <thead>
+        <tr>
+            <th>
+                
+            </th>
+            <th>
+                P@*Points*@
+            </th>
+            <th>
+                Benk@*PointsOnBench*@
+            </th>
+            <th>
+                @*Transfers*@
+            </th>
+            <th>
+                
+            </th>
+            <th>
+                P X
+            </th>
+            <th>
+                Chips
+            </th>
+            <th>
+                $
+            </th>
+            <th>
+                #
+            </th>
+            <th>
+                $$$
+            </th>
+            <th>
+                Runder
+            </th>
+            <th>
+                Cup
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+            @foreach (var player in Model.PlayerStandings)
+            {
+            <tr>
+                <td>
+                    <strong>@player.TeamName</strong>, @player.Name
+                </td>
+                <td>
+                    @player.Points
+                </td>
+                <td>
+                    @player.PointsOnBench
+                </td>
+                <td>
+                    @player.Transfers
+                </td>
+                <td>
+                    @player.TransferCosts
+                </td>
+                <td>
+                    @player.PointsTransferCostsExcluded
+                </td>
+                <td>
+                    @string.Join(" ", player.Chips.RemoveAll(c => c != Chip.None))
+                </td>
+                <td>
+                    @player.Value
+                </td>
+                <td>
+                    @player.Rank
+                </td>
+                <td>
+                    @player.Cash
+                </td>
+                <td>
+                    @string.Join(" ", player.GameweeksWon)
+                </td>
+                <td>
+                    @player.CupRounds
+                </td>
+            </tr>}
+        </tbody>
+    </table>
+
 </div>
