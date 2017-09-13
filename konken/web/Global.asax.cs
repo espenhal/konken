@@ -8,6 +8,10 @@ using System.Web.Routing;
 using Autofac;
 using Autofac.Integration.Mvc;
 using AutoMapper;
+using Microsoft.Azure;
+using Microsoft.WindowsAzure.Storage;
+using Serilog;
+using Serilog.Core;
 
 namespace web
 {
@@ -19,6 +23,20 @@ namespace web
 			FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
 			RouteConfig.RegisterRoutes(RouteTable.Routes);
 			BundleConfig.RegisterBundles(BundleTable.Bundles);
+			
+			var storage = CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("StorageConnectionString"));
+
+			string loggerTableStorageContainer = "logger"
+#if DEBUG
+			+ "test"
+#endif
+			;
+
+			Log.Logger = new LoggerConfiguration()
+				.WriteTo.AzureTableStorage(storageAccount: storage, storageTableName: loggerTableStorageContainer)
+				.CreateLogger();
+
+			Log.Information("Logging.");
 
 			var builder = new ContainerBuilder();
 
@@ -41,6 +59,8 @@ namespace web
 			// Set the dependency resolver to be Autofac.
 			var container = builder.Build();
 			DependencyResolver.SetResolver(new AutofacDependencyResolver(container));
+
+			Log.Information("Application started.");
 		}
 	}
 }

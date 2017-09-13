@@ -20,14 +20,17 @@ namespace web.Controllers
 		public BaseController()
 		{
 			// Parse the connection string and return a reference to the storage account.
-			CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
-				CloudConfigurationManager.GetSetting("StorageConnectionString")
-			);
+			CloudStorageAccount storageAccount =
+				CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("StorageConnectionString"));
 
 			// Create the table client.
 			CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
 			// Retrieve a reference to the table.
-			Table = tableClient.GetTableReference(ConfigurationManager.AppSettings["tablestoragecontainer"]);
+			Table = tableClient.GetTableReference(ConfigurationManager.AppSettings["tablestoragecontainer"]
+#if DEBUG
+				+ "test"
+#endif
+			);
 			// Create the table if it doesn't exist.
 			Table.CreateIfNotExists();
 		}
