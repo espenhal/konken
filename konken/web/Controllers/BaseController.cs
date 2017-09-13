@@ -67,6 +67,9 @@ namespace web.Controllers
 					await Table.ExecuteQuerySegmentedAsync(gameweekTableQuery, new TableContinuationToken());
 
 				leagueGameweek.PlayerGameweeks = Mapper.Map<List<GameweekEntity>, List<PlayerGameweek>>(gameweeksEntities.Results);
+				
+				leagueGameweek.PlayerGameweeks.RemoveAll(
+					p => ConfigurationManager.AppSettings["excludedPlayers"].Split(',').Contains(p.FplPlayerId));
 
 				foreach (var playerGameweek in leagueGameweek.PlayerGameweeks)
 				{
@@ -105,6 +108,9 @@ namespace web.Controllers
 
 				league.Players = Mapper.Map<List<PlayerEntity>, List<Player>>(playerEntities.Results);
 
+				league.Players.RemoveAll(
+					p => ConfigurationManager.AppSettings["excludedPlayers"].Split(',').Contains(p.FplPlayerId));
+					
 				foreach (var player in league.Players)
 				{
 					player.Gameweeks =
