@@ -23,7 +23,7 @@ namespace web
 			FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
 			RouteConfig.RegisterRoutes(RouteTable.Routes);
 			BundleConfig.RegisterBundles(BundleTable.Bundles);
-			
+
 			var storage = CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("StorageConnectionString"));
 
 			string loggerTableStorageContainer = "logger"
@@ -44,7 +44,21 @@ namespace web
 			// the class in Global.asax.)
 			builder.RegisterControllers(typeof(MvcApplication).Assembly).PropertiesAutowired();
 
-			//AutoMapper
+			////AutoMapper
+			//var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+			//builder.RegisterAssemblyTypes(assemblies)
+			//	.Where(t => typeof(Profile).IsAssignableFrom(t) && !t.IsAbstract && t.IsPublic).As<Profile>();
+
+			//builder.Register(c => new MapperConfiguration(cfg =>
+			//{
+			//	foreach (var profile in c.Resolve<IEnumerable<Profile>>())
+			//	{
+			//		cfg.AddProfile(profile);
+			//	}
+			//})).AsSelf().SingleInstance();
+
+			//builder.Register(c => c.Resolve<MapperConfiguration>().CreateMapper(c.Resolve)).As<IMapper>()
+			//	.InstancePerLifetimeScope().PropertiesAutowired();
 			var autoMapperProfileTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes().Where(p => typeof(Profile).IsAssignableFrom(p) && p.IsPublic && !p.IsAbstract));
 			var autoMapperProfiles = autoMapperProfileTypes.Select(p => (Profile)Activator.CreateInstance(p));
 			builder.Register(ctx => new MapperConfiguration(cfg =>
@@ -53,7 +67,7 @@ namespace web
 				{
 					cfg.AddProfile(profile);
 				}
-			}));
+			})).AsSelf().SingleInstance();
 			builder.Register(ctx => ctx.Resolve<MapperConfiguration>().CreateMapper()).As<IMapper>().InstancePerLifetimeScope().PropertiesAutowired();
 
 			// Set the dependency resolver to be Autofac.

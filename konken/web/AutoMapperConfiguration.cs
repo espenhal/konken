@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
+using common;
 
-namespace common
+namespace web
 {
 	public static class AutoMapperConfiguration
 	{
