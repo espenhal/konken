@@ -17,19 +17,24 @@ namespace web.Controllers
 	{
 		public async Task<ActionResult> Index()
 		{
+			LeagueStanding leagueStanding = new LeagueStanding();
+
 			try
 			{
-				var leagueStanding = await CalculateLeagueStanding(ConfigurationManager.AppSettings["leagueid"], null);
+				leagueStanding = await CalculateLeagueStanding(ConfigurationManager.AppSettings["leagueid"], null);
 
 				leagueStanding.PlayerStandings = leagueStanding.PlayerStandings.OrderByDescending(x => x.Points).ToList();
-
-				return View(leagueStanding);
+				
+				if(DateTime.Now.Hour < 24)
+					throw  new Exception("sdfsdfsdf");
 			}
 			catch (Exception e)
 			{
 				Log.Error(e, "Error calculating league standing.");
-				return RedirectToAction("Index", "Error", e);
+				//return RedirectToAction("Index", "Error", e);
 			}
+
+			return View(leagueStanding);
 		}
 
 		public ActionResult Rules()

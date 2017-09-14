@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
-using common;
 
-namespace web.Code
+namespace common
 {
 	public static class AutoMapperConfiguration
 	{
