@@ -54,7 +54,7 @@ namespace web
 					cfg.AddProfile(profile);
 				}
 			}));
-			builder.Register(ctx => ctx.Resolve<MapperConfiguration>().CreateMapper()).As<IMapper>().PropertiesAutowired();
+			builder.Register(ctx => ctx.Resolve<MapperConfiguration>().CreateMapper()).As<IMapper>().InstancePerLifetimeScope().PropertiesAutowired();
 
 			// Set the dependency resolver to be Autofac.
 			var container = builder.Build();

@@ -1,19 +1,10 @@
 ﻿using AutoMapper;
+using common;
 
-namespace common
+namespace web.Code
 {
 	public static class AutoMapperConfiguration
 	{
-		public static void ConfigureStatic()
-		{
-			Mapper.Initialize(cfg =>
-			{
-				cfg.AddProfile<LeagueProfile>();
-				cfg.AddProfile<PlayerProfile>();
-				cfg.AddProfile<GameweekProfile>();
-			});
-		}
-
 		public static void Configure()
 		{
 			var config = new MapperConfiguration(cfg =>
