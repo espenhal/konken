@@ -24,9 +24,6 @@ namespace web.Controllers
 				leagueStanding = await CalculateLeagueStanding(ConfigurationManager.AppSettings["leagueid"], null);
 
 				leagueStanding.PlayerStandings = leagueStanding.PlayerStandings.OrderByDescending(x => x.Points).ToList();
-				
-				if(DateTime.Now.Hour < 24)
-					throw  new Exception("sdfsdfsdf");
 			}
 			catch (Exception e)
 			{
