@@ -50,44 +50,52 @@
         <tbody>
             @foreach (var player in Model.PlayerStandings)
             {
+                <tr>
+                    <td>
+                        <strong>@player.TeamName</strong>, @player.Name
+                    </td>
+                    <td>
+                        @player.Points
+                    </td>
+                    <td>
+                        @player.PointsOnBench
+                    </td>
+                    <td>
+                        @player.Transfers
+                    </td>
+                    <td>
+                        @player.TransferCosts
+                    </td>
+                    <td>
+                        @player.PointsTransferCostsExcluded
+                    </td>
+                    <td>
+                        @string.Join(" ", player.Chips.RemoveAll(c => c != Chip.None))
+                    </td>
+                    <td>
+                        @player.Value
+                    </td>
+                    <td>
+                        @player.Rank
+                    </td>
+                    <td>
+                        @player.Cash
+                    </td>
+                    <td>
+                        @string.Join(" ", player.GameweeksWon)
+                    </td>
+                    <td>
+                        @player.CupRounds
+                    </td>
+                </tr>
+            }
             <tr>
                 <td>
-                    <strong>@player.TeamName</strong>, @player.Name
+                    <p>
+                        Tabellen på https://fantasy.premierleague.com <a href="https://fantasy.premierleague.com/a/leagues/standings/765020/classic">https://fantasy.premierleague.com/a/leagues/standings/765020/classic</a>.
+                    </p>
                 </td>
-                <td>
-                    @player.Points
-                </td>
-                <td>
-                    @player.PointsOnBench
-                </td>
-                <td>
-                    @player.Transfers
-                </td>
-                <td>
-                    @player.TransferCosts
-                </td>
-                <td>
-                    @player.PointsTransferCostsExcluded
-                </td>
-                <td>
-                    @string.Join(" ", player.Chips.RemoveAll(c => c != Chip.None))
-                </td>
-                <td>
-                    @player.Value
-                </td>
-                <td>
-                    @player.Rank
-                </td>
-                <td>
-                    @player.Cash
-                </td>
-                <td>
-                    @string.Join(" ", player.GameweeksWon)
-                </td>
-                <td>
-                    @player.CupRounds
-                </td>
-            </tr>}
+            </tr>
         </tbody>
     </table>
 
