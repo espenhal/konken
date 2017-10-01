@@ -197,8 +197,9 @@ namespace web.Controllers
 
 	    internal static void CalculateMostValuableCash(LeagueStanding leagueStanding, League league)
 	    {
-	        leagueStanding.PlayerStandings.OrderBy(x => x.Value).Last().Cash +=
-	            league.Players.Count * MostValuableWinnerSum;
+	        if (league.Players.First().Gameweeks.Count >= 38)
+	            leagueStanding.PlayerStandings.OrderBy(x => x.Value).Last().Cash +=
+	                league.Players.Count * MostValuableWinnerSum;
 	    }
 
         internal static void CalculateCupCash(LeagueStanding leagueStanding, League league)
