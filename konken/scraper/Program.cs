@@ -73,6 +73,17 @@ namespace scraper
                     HtmlParser.GetGameweeks(gameweekHtml);
             }
 
+            //foreach (var player in league.Players)
+            //{
+            //    foreach (var gw in player.Gameweeks)
+            //    {
+            //        var gameweekPointsHtml = Policy.Execute(() =>
+            //            Scraper.GetHtmlByXPath(
+            //                gw.Link,
+            //                "//*[@id=\"ismr-event-history\"]/div/div/div/table/tbody"));
+            //    }
+            //}
+
             foreach (var player in league.Players)
             {
                 var gameweekChipsHtml = Policy.Execute(() =>

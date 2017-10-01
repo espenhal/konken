@@ -97,8 +97,19 @@ namespace scraper
             {
                 var n = node.ChildNodes.Where(x => x.Name == "td").ToArray();
 
+                var htmlLink = new HtmlAgilityPack.HtmlDocument
+                {
+                    // There are various options, set as needed
+                    OptionFixNestedTags = true
+                };
+
+                htmlLink.LoadHtml(n[0].InnerHtml.Trim());
+
+                var link = htmlLink.DocumentNode.SelectSingleNode("//a").Attributes["href"].Value;
+
                 var gw = new Gameweek()
                 {
+                    Link = $"https://fantasy.premierleague.com{link}",
                     Number = Convert.ToInt32(n[0].InnerText.Trim().Replace("GW", "")),
                     Points = Convert.ToInt32(n[1].InnerText.Trim()),
                     PointsOnBench = Convert.ToInt32(n[2].InnerText.Trim()),

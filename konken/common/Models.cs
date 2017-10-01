@@ -100,6 +100,7 @@ namespace common
 		public int PointsExcludedTransferCosts => Points - Transfers;
 		public int ScoredGoals { get; set; }
 		public Cup Cup { get; set; }
+	    public string Link { get; set; }
 	}
 
 	public class LeagueGameweek

@@ -33,6 +33,7 @@ namespace scraper
                 finally
                 {
                     driver.Quit();
+                    driver.Dispose();
                 }
             }
 
@@ -68,6 +69,7 @@ namespace scraper
                 finally
                 {
                     driver.Quit();
+                    driver.Dispose();
                 }
             }
 
