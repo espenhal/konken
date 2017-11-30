@@ -156,7 +156,7 @@ namespace web.Controllers
 					PointsOnBench = player.Gameweeks.Sum(x => x.PointsOnBench),
 					Transfers = player.Gameweeks.Sum(x => x.Transfers),
 					TransferCosts = player.Gameweeks.Sum(x => x.TransferCosts),
-					PointsTransferCostsExcluded = player.Gameweeks.Sum(x => x.Points), // total med fratrekk for bytter
+					PointsTransferCostsExcluded = player.Gameweeks.Sum(x => x.Points - x.TransferCosts), // total med fratrekk for bytter
 					Chips = player.Gameweeks.Select(x => x.Chip).ToList(),
 					Value = player.Gameweeks.OrderBy(x => x.Number).Last().Value,
 					Rank = player.Gameweeks.OrderBy(x => x.Number).Last().OverallRank,
