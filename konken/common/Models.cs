@@ -97,7 +97,7 @@ namespace common
 		public double Value { get; set; }
 		public int GameweekRank { get; set; }
 		public int OverallRank { get; set; }
-		public int PointsExcludedTransferCosts => Points - Transfers;
+		public int PointsExcludedTransferCosts => Points - TransferCosts;
 		public int ScoredGoals { get; set; }
 		public Cup Cup { get; set; }
 	    public string Link { get; set; }
