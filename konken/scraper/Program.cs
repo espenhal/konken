@@ -13,7 +13,7 @@ namespace scraper
 {
     class Program
     {
-        public static string FplLeagueId = "765020";
+        public static string FplLeagueId = ConfigurationManager.AppSettings["leagueid"];
 
         private static CloudTable Table { get; set; }
 
