@@ -34,9 +34,21 @@ namespace web.Controllers
 			return View(leagueStanding);
 		}
 
-		public ActionResult Rules()
+        public async Task<ActionResult> Rules()
 		{
-			return View();
-		}
+		    League league = new League();
+
+		    try
+		    {
+		        league = await CalculateLeague(ConfigurationManager.AppSettings["leagueid"], null);
+		    }
+		    catch (Exception e)
+		    {
+		        Log.Error(e, "Error calculating league standing.");
+		        //return RedirectToAction("Index", "Error", e);
+		    }
+            
+		    return View(league);
+        }
 	}
 }
