@@ -43,54 +43,54 @@ namespace web.Controllers
 			Table.CreateIfNotExists();
 		}
 
-		#region private parts
+        #region private parts
 
-		//internal async Task<LeagueGameweek> CalculateLeagueGameweek(string fplLeagueId, int round)
-		//{
-		//	TableOperation retrieveLeagueOperation = TableOperation.Retrieve<LeagueEntity>("League", fplLeagueId);
+        internal async Task<LeagueGameweek> CalculateLeagueGameweek(string fplLeagueId, int round)
+        {
+            TableOperation retrieveLeagueOperation = TableOperation.Retrieve<LeagueEntity>("League", fplLeagueId);
 
-		//	TableResult retrieveLeagueResult = await Table.ExecuteAsync(retrieveLeagueOperation);
+            TableResult retrieveLeagueResult = await Table.ExecuteAsync(retrieveLeagueOperation);
 
-		//	LeagueGameweek leagueGameweek = Mapper.Map<LeagueEntity, LeagueGameweek>((LeagueEntity)retrieveLeagueResult.Result);
+            LeagueGameweek leagueGameweek = Mapper.Map<LeagueEntity, LeagueGameweek>((LeagueEntity)retrieveLeagueResult.Result);
 
-		//	if (leagueGameweek != null)
-		//	{
-		//		TableQuery<PlayerEntity> playerTableQuery =
-		//			new TableQuery<PlayerEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey",
-		//				QueryComparisons.Equal, "Player"));
+            if (leagueGameweek != null)
+            {
+                TableQuery<PlayerEntity> playerTableQuery =
+                    new TableQuery<PlayerEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey",
+                        QueryComparisons.Equal, "Player"));
 
-		//		TableQuerySegment<PlayerEntity> playerEntities =
-		//			await Table.ExecuteQuerySegmentedAsync(playerTableQuery, new TableContinuationToken());
+                TableQuerySegment<PlayerEntity> playerEntities =
+                    await Table.ExecuteQuerySegmentedAsync(playerTableQuery, new TableContinuationToken());
 
-		//		var partitionKeyFilter = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal,
-		//			"Gameweek");
-		//		string gameweekNumberFilter = TableQuery.GenerateFilterConditionForInt("Number", QueryComparisons.Equal,
-		//			round);
+                var partitionKeyFilter = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal,
+                    "Gameweek");
+                string gameweekNumberFilter = TableQuery.GenerateFilterConditionForInt("Number", QueryComparisons.Equal,
+                    round);
 
-		//		TableQuery<GameweekEntity> gameweekTableQuery =
-		//			new TableQuery<GameweekEntity>().Where(TableQuery.CombineFilters(partitionKeyFilter,
-		//				TableOperators.And, gameweekNumberFilter));
+                TableQuery<GameweekEntity> gameweekTableQuery =
+                    new TableQuery<GameweekEntity>().Where(TableQuery.CombineFilters(partitionKeyFilter,
+                        TableOperators.And, gameweekNumberFilter));
 
-		//		TableQuerySegment<GameweekEntity> gameweeksEntities =
-		//			await Table.ExecuteQuerySegmentedAsync(gameweekTableQuery, new TableContinuationToken());
+                TableQuerySegment<GameweekEntity> gameweeksEntities =
+                    await Table.ExecuteQuerySegmentedAsync(gameweekTableQuery, new TableContinuationToken());
 
-		//		leagueGameweek.PlayerGameweeks = Mapper.Map<List<GameweekEntity>, List<PlayerGameweek>>(gameweeksEntities.Results);
-				
-		//		leagueGameweek.PlayerGameweeks.RemoveAll(
-		//			p => ConfigurationManager.AppSettings["excludedPlayers"].Split(',').Contains(p.FplPlayerId));
+                leagueGameweek.PlayerGameweeks = Mapper.Map<List<GameweekEntity>, List<PlayerGameweek>>(gameweeksEntities.Results);
 
-		//		foreach (var playerGameweek in leagueGameweek.PlayerGameweeks)
-		//		{
-		//			playerGameweek.Name =
-		//				playerEntities.Results.First(x => x.FplPlayerId == playerGameweek.FplPlayerId).Name;
-		//			playerGameweek.TeamName =
-		//				playerEntities.Results.First(x => x.FplPlayerId == playerGameweek.FplPlayerId).TeamName;
-		//		}
-		//	}
-		//	return leagueGameweek;
-		//}
+                leagueGameweek.PlayerGameweeks.RemoveAll(
+                    p => ConfigurationManager.AppSettings["excludedPlayers"].Split(',').Contains(p.FplPlayerId));
 
-		internal async Task<League>  CalculateLeague(string fplLeagueId, int? round = null)
+                foreach (var playerGameweek in leagueGameweek.PlayerGameweeks)
+                {
+                    playerGameweek.Name =
+                        playerEntities.Results.First(x => x.FplPlayerId == playerGameweek.FplPlayerId).Name;
+                    playerGameweek.TeamName =
+                        playerEntities.Results.First(x => x.FplPlayerId == playerGameweek.FplPlayerId).TeamName;
+                }
+            }
+            return leagueGameweek;
+        }
+
+        internal async Task<League>  CalculateLeague(string fplLeagueId, int? round = null)
 		{
 			TableOperation retrieveLeagueOperation = TableOperation.Retrieve<LeagueEntity>("League", fplLeagueId);
 
