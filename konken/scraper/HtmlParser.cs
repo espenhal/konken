@@ -189,44 +189,70 @@ namespace scraper
             {
                 HtmlNode[] n = node.ChildNodes.Where(x => x.Name == "td").ToArray();
 
-                var gameweekNumber = Convert.ToInt32(n[0].InnerText.Trim().Replace(" ", ""));
-
-                if (gameweekNumber > player.Gameweeks.Count)
-                    break;
-
-                var homeName = n[1].ChildNodes[1].ChildNodes[3].InnerText.Trim();
-                var homeTeamName = n[1].ChildNodes[1].ChildNodes[1].InnerText.Trim();
-                var homeFplPlayerId = GetFplPlayerIdCup(n, gameweekNumber);
-                var homePointsString = n[2].InnerText.Trim().Split('-')[0];
-
-                var awayName = n[3].ChildNodes[1].ChildNodes[3].InnerText.Trim();
-                var awayTeamName = n[3].ChildNodes[1].ChildNodes[1].InnerText.Trim();
-                var awayFplPlayerId = GetFplPlayerIdCup(n, gameweekNumber, true);
-                var awayPointsString = n[2].InnerText.Trim().Split('-')[1];
-
-                if (string.IsNullOrEmpty(homeName) || string.IsNullOrEmpty(homeTeamName) || string.IsNullOrEmpty(homeFplPlayerId)
-                    || string.IsNullOrEmpty(awayName) || string.IsNullOrEmpty(awayTeamName) || string.IsNullOrEmpty(awayFplPlayerId)) continue;
-
-                int homePoints = 0, awayPoints = 0;
-
-                var cup = new Cup()
+                if (n[1].Attributes["class"].Value == "ism-matches-table__tiebreak")
                 {
-                    GamewekkNumber = gameweekNumber,
-                    HomeName = homeName,
-                    HomeTeamName = homeTeamName,
-                    HomeFplPlayerId = homeFplPlayerId,
-                    HomePoints = (int.TryParse(homePointsString, out homePoints)) ? homePoints : (int?)null,
-                    AwayName = awayName,
-                    AwayTeamName = awayTeamName,
-                    AwayFplPlayerId = awayFplPlayerId,
-                    AwayPoints = (int.TryParse(awayPointsString, out awayPoints)) ? awayPoints : (int?)null,
-                };
+                    //handle tiebreak
+                    var tiebreak = n[1].InnerText.Trim();
 
-                player.Gameweeks[gameweekNumber - 1].Cup = cup;
+                    //if (tiebreak.Contains(player.TeamName)) { }
+                    if (tiebreak == $"Goals scored: {player.TeamName} win.")
+                    {
+                        Cup cup = player.Gameweeks.Last(x => x.Cup != null).Cup;
+                        if (cup.AwayPoints == cup.HomePoints)
+                        {
+                            if (cup.AwayFplPlayerId == player.FplPlayerId)
+                            {
+                                cup.HomePoints = 0;
+                            }
+                            else
+                            {
+                                cup.AwayPoints = 0;
+                            }
+                        }
+                    }
+                }
+                else
+                {
 
-                //var n = node.ChildNodes.Where(x => x.Name == "td").ToArray();
-                //var gameweekNumber = Convert.ToInt32(n[0].InnerText.Trim().Replace(" ", "")) - 1;
-                //player.Gameweeks[gameweekNumber].Cup = true;
+                    var gameweekNumber = Convert.ToInt32(n[0].InnerText.Trim().Replace(" ", ""));
+
+                    if (gameweekNumber > player.Gameweeks.Count)
+                        break;
+
+                    var homeName = n[1].ChildNodes[1].ChildNodes[3].InnerText.Trim();
+                    var homeTeamName = n[1].ChildNodes[1].ChildNodes[1].InnerText.Trim();
+                    var homeFplPlayerId = GetFplPlayerIdCup(n, gameweekNumber);
+                    var homePointsString = n[2].InnerText.Trim().Split('-')[0];
+
+                    var awayName = n[3].ChildNodes[1].ChildNodes[3].InnerText.Trim();
+                    var awayTeamName = n[3].ChildNodes[1].ChildNodes[1].InnerText.Trim();
+                    var awayFplPlayerId = GetFplPlayerIdCup(n, gameweekNumber, true);
+                    var awayPointsString = n[2].InnerText.Trim().Split('-')[1];
+
+                    if (string.IsNullOrEmpty(homeName) || string.IsNullOrEmpty(homeTeamName) || string.IsNullOrEmpty(homeFplPlayerId)
+                        || string.IsNullOrEmpty(awayName) || string.IsNullOrEmpty(awayTeamName) || string.IsNullOrEmpty(awayFplPlayerId)) continue;
+
+                    int homePoints = 0, awayPoints = 0;
+
+                    var cup = new Cup()
+                    {
+                        GamewekkNumber = gameweekNumber,
+                        HomeName = homeName,
+                        HomeTeamName = homeTeamName,
+                        HomeFplPlayerId = homeFplPlayerId,
+                        HomePoints = (int.TryParse(homePointsString, out homePoints)) ? homePoints : (int?)null,
+                        AwayName = awayName,
+                        AwayTeamName = awayTeamName,
+                        AwayFplPlayerId = awayFplPlayerId,
+                        AwayPoints = (int.TryParse(awayPointsString, out awayPoints)) ? awayPoints : (int?)null,
+                    };
+
+                    player.Gameweeks[gameweekNumber - 1].Cup = cup;
+
+                    //var n = node.ChildNodes.Where(x => x.Name == "td").ToArray();
+                    //var gameweekNumber = Convert.ToInt32(n[0].InnerText.Trim().Replace(" ", "")) - 1;
+                    //player.Gameweeks[gameweekNumber].Cup = true;
+                }
             }
         }
 

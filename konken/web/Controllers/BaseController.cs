@@ -11,37 +11,37 @@ using Microsoft.WindowsAzure.Storage.Table;
 
 namespace web.Controllers
 {
-	public class BaseController : Controller
-	{
+    public class BaseController : Controller
+    {
         #region Constants
-	    private const double GameweekWinnerSum = 25;
+        private const double GameweekWinnerSum = 25;
         private const double WinnerSum = 212.5;
-	    private const double MostValuableWinnerSum = 62.5;
-	    private const double LongestRunInCupSum = 62.5;
-	    private const double HalfWayWinnerSum = 62.5;
+        private const double MostValuableWinnerSum = 62.5;
+        private const double LongestRunInCupSum = 62.5;
+        private const double HalfWayWinnerSum = 62.5;
         #endregion
 
         public IMapper Mapper { get; set; }
 
-		public CloudTable Table { get; set; }
+        public CloudTable Table { get; set; }
 
-		public BaseController()
-		{
-			// Parse the connection string and return a reference to the storage account.
-			CloudStorageAccount storageAccount =
-				CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("StorageConnectionString"));
+        public BaseController()
+        {
+            // Parse the connection string and return a reference to the storage account.
+            CloudStorageAccount storageAccount =
+                CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("StorageConnectionString"));
 
-			// Create the table client.
-			CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
-			// Retrieve a reference to the table.
-			Table = tableClient.GetTableReference(ConfigurationManager.AppSettings["tablestoragecontainer"]
+            // Create the table client.
+            CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
+            // Retrieve a reference to the table.
+            Table = tableClient.GetTableReference(ConfigurationManager.AppSettings["tablestoragecontainer"]
 #if DEBUG
 				+ "test"
 #endif
-			);
-			// Create the table if it doesn't exist.
-			Table.CreateIfNotExists();
-		}
+            );
+            // Create the table if it doesn't exist.
+            Table.CreateIfNotExists();
+        }
 
         #region private parts
 
@@ -90,224 +90,231 @@ namespace web.Controllers
             return leagueGameweek;
         }
 
-        internal async Task<League>  CalculateLeague(string fplLeagueId, int? round = null)
-		{
-			TableOperation retrieveLeagueOperation = TableOperation.Retrieve<LeagueEntity>("League", fplLeagueId);
+        internal async Task<League> CalculateLeague(string fplLeagueId, int? round = null)
+        {
+            TableOperation retrieveLeagueOperation = TableOperation.Retrieve<LeagueEntity>("League", fplLeagueId);
 
-			TableResult retrieveLeagueResult = await Table.ExecuteAsync(retrieveLeagueOperation);
+            TableResult retrieveLeagueResult = await Table.ExecuteAsync(retrieveLeagueOperation);
 
-			League league = Mapper.Map<LeagueEntity, League>((LeagueEntity)retrieveLeagueResult.Result);
+            League league = Mapper.Map<LeagueEntity, League>((LeagueEntity)retrieveLeagueResult.Result);
 
-			if (league != null)
-			{
-				TableQuery<PlayerEntity> playerTableQuery =
-					new TableQuery<PlayerEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey",
-						QueryComparisons.Equal, "Player"));
+            if (league != null)
+            {
+                TableQuery<PlayerEntity> playerTableQuery =
+                    new TableQuery<PlayerEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey",
+                        QueryComparisons.Equal, "Player"));
 
-				TableQuerySegment<PlayerEntity> playerEntities =
-					await Table.ExecuteQuerySegmentedAsync(playerTableQuery, new TableContinuationToken());
+                TableQuerySegment<PlayerEntity> playerEntities =
+                    await Table.ExecuteQuerySegmentedAsync(playerTableQuery, new TableContinuationToken());
 
-				TableQuery<GameweekEntity> gameweekTableQuery =
-					new TableQuery<GameweekEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey",
-						QueryComparisons.Equal, "Gameweek"));
+                TableQuery<GameweekEntity> gameweekTableQuery =
+                    new TableQuery<GameweekEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey",
+                        QueryComparisons.Equal, "Gameweek"));
 
-				TableQuerySegment<GameweekEntity> gameweeksEntities =
-					await Table.ExecuteQuerySegmentedAsync(gameweekTableQuery, new TableContinuationToken());
+                TableQuerySegment<GameweekEntity> gameweeksEntities =
+                    await Table.ExecuteQuerySegmentedAsync(gameweekTableQuery, new TableContinuationToken());
 
-				league.Players = Mapper.Map<List<PlayerEntity>, List<Player>>(playerEntities.Results);
+                league.Players = Mapper.Map<List<PlayerEntity>, List<Player>>(playerEntities.Results);
 
-				league.Players.RemoveAll(
-					p => ConfigurationManager.AppSettings["excludedPlayers"].Split(',').Contains(p.FplPlayerId));
-					
-				foreach (var player in league.Players)
-				{
-					player.Gameweeks =
-						Mapper.Map<List<GameweekEntity>, List<Gameweek>>(
-							gameweeksEntities.Results.Where(
-								x => x.FplLeagueId == fplLeagueId && x.FplPlayerId == player.FplPlayerId).ToList());
+                league.Players.RemoveAll(
+                    p => ConfigurationManager.AppSettings["excludedPlayers"].Split(',').Contains(p.FplPlayerId));
 
-					if (round == null)
-						round = player.Gameweeks.Count;
+                foreach (var player in league.Players)
+                {
+                    player.Gameweeks =
+                        Mapper.Map<List<GameweekEntity>, List<Gameweek>>(
+                            gameweeksEntities.Results.Where(
+                                x => x.FplLeagueId == fplLeagueId && x.FplPlayerId == player.FplPlayerId).ToList());
 
-					player.Gameweeks = player.Gameweeks.Where(x => x.Number <= round).OrderBy(x => x.Number).ToList();
-				}
-			}
-			return league;
-		}
+                    if (round == null)
+                        round = player.Gameweeks.Count;
 
-		internal async Task<LeagueStanding> CalculateLeagueStanding(string fplLeagueId, int? round)
-		{
-			var league = await CalculateLeague(fplLeagueId, round);
+                    player.Gameweeks = player.Gameweeks.Where(x => x.Number <= round).OrderBy(x => x.Number).ToList();
+                }
+            }
+            return league;
+        }
 
-			LeagueStanding leagueStanding = new LeagueStanding()
-			{
-				FplLeagueId = league.FplLeagueId,
-				Name = league.Name,
-				PlayerStandings = new List<PlayerStanding>()
-			};
-			foreach (var player in league.Players)
-			{
-				PlayerStanding playerStanding = new PlayerStanding()
-				{
-					FplPlayerId = player.FplPlayerId,
-					Name = player.Name,
-					TeamName = player.TeamName,
-					Points = player.Gameweeks.OrderBy(x => x.Number).Last().OverallPoints, // total uten fratrekk for bytter
-					PointsOnBench = player.Gameweeks.Sum(x => x.PointsOnBench),
-					Transfers = player.Gameweeks.Sum(x => x.Transfers),
-					TransferCosts = player.Gameweeks.Sum(x => x.TransferCosts),
-					PointsTransferCostsExcluded = player.Gameweeks.Sum(x => x.Points), // total med fratrekk for bytter
-					Chips = player.Gameweeks.Select(x => x.Chip).ToList(),
-					Value = player.Gameweeks.OrderBy(x => x.Number).Last().Value,
-					Rank = player.Gameweeks.OrderBy(x => x.Number).Last().OverallRank,
-					Cash = CalculateGameweekWinnerCash(player, league),
-					GameweeksWon = CalculatePlayerGameweekWinners(player, league),
-					CupRounds = player.Gameweeks.Count(x => x.Cup != null)
-				};
+        internal async Task<LeagueStanding> CalculateLeagueStanding(string fplLeagueId, int? round)
+        {
+            var league = await CalculateLeague(fplLeagueId, round);
 
-				leagueStanding.PlayerStandings.Add(playerStanding);
-			}
+            LeagueStanding leagueStanding = new LeagueStanding()
+            {
+                FplLeagueId = league.FplLeagueId,
+                Name = league.Name,
+                PlayerStandings = new List<PlayerStanding>()
+            };
+            foreach (var player in league.Players)
+            {
+                PlayerStanding playerStanding = new PlayerStanding()
+                {
+                    FplPlayerId = player.FplPlayerId,
+                    Name = player.Name,
+                    TeamName = player.TeamName,
+                    Points = player.Gameweeks.OrderBy(x => x.Number).Last().OverallPoints, // total uten fratrekk for bytter
+                    PointsOnBench = player.Gameweeks.Sum(x => x.PointsOnBench),
+                    Transfers = player.Gameweeks.Sum(x => x.Transfers),
+                    TransferCosts = player.Gameweeks.Sum(x => x.TransferCosts),
+                    PointsTransferCostsExcluded = player.Gameweeks.Sum(x => x.Points), // total med fratrekk for bytter
+                    Chips = player.Gameweeks.Select(x => x.Chip).ToList(),
+                    Value = player.Gameweeks.OrderBy(x => x.Number).Last().Value,
+                    Rank = player.Gameweeks.OrderBy(x => x.Number).Last().OverallRank,
+                    Cash = CalculateGameweekWinnerCash(player, league),
+                    GameweeksWon = CalculatePlayerGameweekWinners(player, league),
+                    CupRounds = player.Gameweeks.Count(x => x.Cup != null)
+                };
 
-			leagueStanding.PlayerStandings = leagueStanding.PlayerStandings.OrderBy(x => x.Points).ToList();
+                leagueStanding.PlayerStandings.Add(playerStanding);
+            }
 
-			CalculateHalfSeasonCash(leagueStanding, league);
-			CalculateCupCash(leagueStanding, league);
+            leagueStanding.PlayerStandings = leagueStanding.PlayerStandings.OrderBy(x => x.Points).ToList();
+
+            CalculateHalfSeasonCash(leagueStanding, league);
+            CalculateCupCash(leagueStanding, league);
             CalculateEndOfSeasonCash(leagueStanding, league);
             CalculateMostValuableCash(leagueStanding, league);
 
-			return leagueStanding;
-		}
+            return leagueStanding;
+        }
 
-		internal double CalculateGameweekWinnerCash(Player player, League league)
-		{
-			return (league.Players.Count * GameweekWinnerSum) * CalculatePlayerGameweekWinners(player, league).Count;
-		}
+        internal double CalculateGameweekWinnerCash(Player player, League league)
+        {
+            return (league.Players.Count * GameweekWinnerSum) * CalculatePlayerGameweekWinners(player, league).Count;
+        }
 
-		internal static void CalculateHalfSeasonCash(LeagueStanding leagueStanding, League league)
-		{
-			if (league.Players.First().Gameweeks.Count >= 20)
-				leagueStanding.PlayerStandings.Last().Cash += league.Players.Count * HalfWayWinnerSum;
-	    }
+        internal static void CalculateHalfSeasonCash(LeagueStanding leagueStanding, League league)
+        {
+            if (league.Players.First().Gameweeks.Count >= 20)
+                leagueStanding.PlayerStandings.Last().Cash += league.Players.Count * HalfWayWinnerSum;
+        }
 
-	    internal static void CalculateEndOfSeasonCash(LeagueStanding leagueStanding, League league)
-	    {
-	        if (league.Players.First().Gameweeks.Count >= 38)
-	            leagueStanding.PlayerStandings.Last().Cash += league.Players.Count * WinnerSum;
-	    }
+        internal static void CalculateEndOfSeasonCash(LeagueStanding leagueStanding, League league)
+        {
+            if (league.Players.First().Gameweeks.Count >= 38)
+                leagueStanding.PlayerStandings.Last().Cash += league.Players.Count * WinnerSum;
+        }
 
-	    internal static void CalculateMostValuableCash(LeagueStanding leagueStanding, League league)
-	    {
-	        if (league.Players.First().Gameweeks.Count >= 38)
-	            leagueStanding.PlayerStandings.OrderBy(x => x.Value).Last().Cash +=
-	                league.Players.Count * MostValuableWinnerSum;
-	    }
+        internal static void CalculateMostValuableCash(LeagueStanding leagueStanding, League league)
+        {
+            if (league.Players.First().Gameweeks.Count < 38) return;
+
+            var max = leagueStanding.PlayerStandings.Max(x => x.Cash);
+
+            var mostValuableSquads = leagueStanding.PlayerStandings.Where(x => x.Cash == max).ToList();
+
+            foreach (var player in mostValuableSquads)
+            {
+                leagueStanding.PlayerStandings.First(x => x.FplPlayerId == player.FplPlayerId).Cash += (league.Players.Count * MostValuableWinnerSum) / mostValuableSquads.Count;
+            }
+        }
 
         internal static void CalculateCupCash(LeagueStanding leagueStanding, League league)
-		{
-			Dictionary<string, int> playerCupAppearances = new Dictionary<string, int>();
+        {
+            Dictionary<string, int> playerCupAppearances = new Dictionary<string, int>();
 
-			foreach (var player in league.Players)
-			{
-				playerCupAppearances.Add(player.FplPlayerId, player.Gameweeks.Count(x => x.Cup != null));
-			}
+            foreach (var player in league.Players)
+            {
+                playerCupAppearances.Add(player.FplPlayerId, player.Gameweeks.Count(x => x.Cup != null));
+            }
 
-			int max = playerCupAppearances.Max(x => x.Value);
+            int max = playerCupAppearances.Max(x => x.Value);
 
-			if (max == 0)
-				return;
+            if (max == 0)
+                return;
 
-			var playersFurthestInCup = playerCupAppearances.Where(x => x.Value == max).Select(x => x.Key).ToList();
+            var playersFurthestInCup = playerCupAppearances.Where(x => x.Value == max).Select(x => x.Key).ToList();
 
-			foreach (var player in playersFurthestInCup)
-			{
-				leagueStanding.PlayerStandings.First(x => x.FplPlayerId == player).Cash += 500.0 / playersFurthestInCup.Count;
-			}
-		}
-        
-		internal List<int> CalculatePlayerGameweekWinners(Player player, League league)
-		{
-			return CalculateGameweekWinners(league).Where(x => x.FplPlayerId == player.FplPlayerId).Select(x => x.Number).ToList();
-		}
+            foreach (var player in playersFurthestInCup)
+            {
+                leagueStanding.PlayerStandings.First(x => x.FplPlayerId == player).Cash += (league.Players.Count * LongestRunInCupSum) / playersFurthestInCup.Count;
+            }
+        }
 
-		internal List<GameweekWinner> CalculateGameweekWinners(League league)
-		{
-			List<GameweekWinner> gameweekWinners = new List<GameweekWinner>();
+        internal List<int> CalculatePlayerGameweekWinners(Player player, League league)
+        {
+            return CalculateGameweekWinners(league).Where(x => x.FplPlayerId == player.FplPlayerId).Select(x => x.Number).ToList();
+        }
 
-			var numberOfRounds = league.Players.FirstOrDefault()?.Gameweeks.Count;
+        internal List<GameweekWinner> CalculateGameweekWinners(League league)
+        {
+            List<GameweekWinner> gameweekWinners = new List<GameweekWinner>();
 
-			if (numberOfRounds == null)
-				return null;
+            var numberOfRounds = league.Players.FirstOrDefault()?.Gameweeks.Count;
 
-			for (var i = 1; i <= numberOfRounds.Value; i++)
-			{
-				GameweekWinner gameweekWinner = new GameweekWinner() { Number = i };
+            if (numberOfRounds == null)
+                return null;
 
-				foreach (var player in league.Players)
-				{
-					if (player?.Gameweeks == null || player.Gameweeks.Count < 1)
-						continue;
+            for (var i = 1; i <= numberOfRounds.Value; i++)
+            {
+                GameweekWinner gameweekWinner = new GameweekWinner() { Number = i };
 
-					var better = false;
+                foreach (var player in league.Players)
+                {
+                    if (player?.Gameweeks == null || player.Gameweeks.Count < 1)
+                        continue;
 
-					if (string.IsNullOrEmpty(gameweekWinner.FplPlayerId))
-					{
-						better = true;
-					}
-					else
-					{
-						var gameweek = player.Gameweeks.FirstOrDefault(x => x.Number == i);
+                    var better = false;
 
-						if (gameweek == null)
-							continue;
+                    if (string.IsNullOrEmpty(gameweekWinner.FplPlayerId))
+                    {
+                        better = true;
+                    }
+                    else
+                    {
+                        var gameweek = player.Gameweeks.FirstOrDefault(x => x.Number == i);
 
-						if (gameweek.PointsExcludedTransferCosts > gameweekWinner.PointsExcludedTransferCosts)
-						{
-							better = true;
-						}
-						else
-						{
-							if (gameweek.PointsExcludedTransferCosts == gameweekWinner.PointsExcludedTransferCosts)
-							{
-								if (gameweek.PointsOnBench > gameweekWinner.PointsOnBench)
-									better = true;
-								else
-								{
-									if (gameweek.PointsOnBench == gameweekWinner.PointsOnBench)
-									{
-										if (gameweek.ScoredGoals > gameweekWinner.ScoredGoals)
-											better = true;
-										else
-										{
-											// poengdeling!
-										}
-									}
-								}
-							}
-						}
-					}
+                        if (gameweek == null)
+                            continue;
 
-					if (better)
-					{
-						var fplPlayerId = player.FplPlayerId;
-						var pointsExcludedTransferCosts =
-							player.Gameweeks.FirstOrDefault(x => x.Number == i)?.PointsExcludedTransferCosts;
-						var pointsOnBench = player.Gameweeks.FirstOrDefault(x => x.Number == i)?.PointsOnBench;
+                        if (gameweek.PointsExcludedTransferCosts > gameweekWinner.PointsExcludedTransferCosts)
+                        {
+                            better = true;
+                        }
+                        else
+                        {
+                            if (gameweek.PointsExcludedTransferCosts == gameweekWinner.PointsExcludedTransferCosts)
+                            {
+                                if (gameweek.PointsOnBench > gameweekWinner.PointsOnBench)
+                                    better = true;
+                                else
+                                {
+                                    if (gameweek.PointsOnBench == gameweekWinner.PointsOnBench)
+                                    {
+                                        if (gameweek.ScoredGoals > gameweekWinner.ScoredGoals)
+                                            better = true;
+                                        else
+                                        {
+                                            // poengdeling!
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
 
-						if (string.IsNullOrEmpty(fplPlayerId) || pointsExcludedTransferCosts == null || pointsOnBench == null)
-							continue;
+                    if (better)
+                    {
+                        var fplPlayerId = player.FplPlayerId;
+                        var pointsExcludedTransferCosts =
+                            player.Gameweeks.FirstOrDefault(x => x.Number == i)?.PointsExcludedTransferCosts;
+                        var pointsOnBench = player.Gameweeks.FirstOrDefault(x => x.Number == i)?.PointsOnBench;
 
-						gameweekWinner.FplPlayerId = fplPlayerId;
-						gameweekWinner.PointsExcludedTransferCosts = pointsExcludedTransferCosts.Value;
-						gameweekWinner.PointsOnBench = pointsOnBench.Value;
-						gameweekWinner.ScoredGoals = 0;
-					}
-				}
-				gameweekWinners.Add(gameweekWinner);
-			}
+                        if (string.IsNullOrEmpty(fplPlayerId) || pointsExcludedTransferCosts == null || pointsOnBench == null)
+                            continue;
 
-			return gameweekWinners;
-		}
+                        gameweekWinner.FplPlayerId = fplPlayerId;
+                        gameweekWinner.PointsExcludedTransferCosts = pointsExcludedTransferCosts.Value;
+                        gameweekWinner.PointsOnBench = pointsOnBench.Value;
+                        gameweekWinner.ScoredGoals = 0;
+                    }
+                }
+                gameweekWinners.Add(gameweekWinner);
+            }
 
-		#endregion
-	}
+            return gameweekWinners;
+        }
+
+        #endregion
+    }
 }
