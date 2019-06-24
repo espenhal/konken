@@ -168,6 +168,7 @@ namespace scraper
                 }
             }
         }
+
         public static void GetCupHistory(Player player, string html)
         {
             HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument();

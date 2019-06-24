@@ -199,9 +199,9 @@ namespace web.Controllers
         {
             if (league.Players.First().Gameweeks.Count < 38) return;
 
-            var max = leagueStanding.PlayerStandings.Max(x => x.Cash);
+            var max = leagueStanding.PlayerStandings.Max(x => x.Value);
 
-            var mostValuableSquads = leagueStanding.PlayerStandings.Where(x => x.Cash == max).ToList();
+            var mostValuableSquads = leagueStanding.PlayerStandings.Where(x => x.Value == max).ToList();
 
             foreach (var player in mostValuableSquads)
             {
