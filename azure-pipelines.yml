@@ -29,7 +29,7 @@ steps:
     zipAfterPublish: True
 
 - task: AzureWebApp@1
-  displayName: 'dotnet publish $(buildConfiguration) to $(Build.ArtifactStagingDirectory)'
+  displayName: 'deploy azure web app konken'
   inputs:
     azureSubscription: 'BetalForForbruk'
     appName: 'konken'
