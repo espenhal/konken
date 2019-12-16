@@ -28,8 +28,10 @@ steps:
     arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
     zipAfterPublish: True
 
-# this code takes all the files in $(Build.ArtifactStagingDirectory) and uploads them as an artifact of your build.
-- task: PublishBuildArtifacts@1
+- task: AzureWebApp@1
+  displayName: 'dotnet publish $(buildConfiguration) to $(Build.ArtifactStagingDirectory)'
   inputs:
-    pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
-    artifactName: 'konken'
+    azureSubscription: '<Azure service connection>'
+    appName: 'konken'
+    appType: webApp
+    package: $(System.ArtifactsDirectory)/**/*.zip
