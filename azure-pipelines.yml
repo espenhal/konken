@@ -31,7 +31,7 @@ steps:
 - task: AzureWebApp@1
   displayName: 'dotnet publish $(buildConfiguration) to $(Build.ArtifactStagingDirectory)'
   inputs:
-    azureSubscription: '<Azure service connection>'
+    azureSubscription: 'BetalForForbruk'
     appName: 'konken'
     appType: webApp
     package: $(System.ArtifactsDirectory)/**/*.zip
