@@ -16,9 +16,16 @@ namespace web
         {
             CreateWebHostBuilder(args).Build().Run();
         }
-
+        
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration((hostContext, config) =>
+                {
+                    config.Sources.Clear();
+                    config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+                    config.AddJsonFile($"appsettings.{Environment.MachineName}.json", optional: true);
+                    config.AddEnvironmentVariables();
+                })
                 .UseStartup<Startup>();
     }
 }
