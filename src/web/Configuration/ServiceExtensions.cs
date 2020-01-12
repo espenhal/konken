@@ -14,6 +14,8 @@ namespace web.Configuration
             if (!serviceUrl.EndsWith("/"))
                 serviceUrl = $"{serviceUrl}/";
             services.AddHttpClient(name: HttpClients.FplApi, client => { client.BaseAddress = new Uri(serviceUrl, UriKind.RelativeOrAbsolute); });
+            
+            services.AddHttpClient(name: HttpClients.FplLogin, client => { client.BaseAddress = new Uri(settings.FplLoginUrl, UriKind.Absolute); });
 
             services.AddSingleton<IFplApiWrapper>(c =>
                 new FplApiWrapper(c.GetRequiredService<IHttpClientFactory>(), settings.LeagueId));
