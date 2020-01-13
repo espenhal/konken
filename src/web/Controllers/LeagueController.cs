@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Services;
+using web.Models.Data;
 using web.Settings;
 
 namespace web.Controllers
@@ -33,7 +36,13 @@ namespace web.Controllers
             var leagueId = _appSettings.LeagueId;
             var league = await _fplApiWrapper.GetLeague(leagueId);
 
-            return Ok(league);
+            List<TeamHistory> teamHistories = new List<TeamHistory>();
+            foreach (var standing in league.standings.results)
+            {
+                teamHistories.Add(await _fplApiWrapper.GetTeam(standing.entry.ToString()));
+            }
+            
+            return Ok(new { league, teamHistories});
         }
     }
 }

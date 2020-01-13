@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace web.Models
+namespace web.Models.View
 {
 	public class League
 	{

@@ -5,7 +5,9 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using web;
+using web.Models.Data;
 
 namespace Services
 {
@@ -73,7 +75,7 @@ request.AddParameter("app", "plfpl-web");
             }
         }
 
-        public async Task<string> GetLeague(string leagueId)
+        public async Task<LeagueStanding> GetLeague(string leagueId)
         {
             await Login();
 
@@ -85,16 +87,37 @@ request.AddParameter("app", "plfpl-web");
 
                     using (var response = await client.GetAsync($"leagues-classic/{leagueId}/standings"))
                     {
-                        return await response.Content.ReadAsStringAsync();
+                        return JsonConvert.DeserializeObject<LeagueStanding>(await response.Content.ReadAsStringAsync());
                     }
                 }
             }
+        }
+
+        public async Task<TeamHistory> GetTeam(string teamId)
+        {
+            await Login();
+
+            using (var handler = new HttpClientHandler() {CookieContainer = _cookieContainer})
+            {
+                using (var client = new HttpClient(handler))
+                {
+                    client.BaseAddress = new Uri("https://fantasy.premierleague.com/api/");
+
+                    using (var response = await client.GetAsync($"entry/{teamId}/history/"))
+                    {
+                        var result = await response.Content.ReadAsStringAsync();
+                        
+                        return JsonConvert.DeserializeObject<TeamHistory>(result);
+                    }
+                }
+            }   
         }
     }
 
     public interface IFplApiWrapper
     {
         Task<string> GetBootstrap();
-        Task<string> GetLeague(string leagueId);
+        Task<LeagueStanding> GetLeague(string leagueId);
+        Task<TeamHistory> GetTeam(string teamId);
     }
 }
