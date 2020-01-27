@@ -56,7 +56,7 @@ export class Home extends Component {
 
         return (
             <div>
-                <h1>Alle oppdrag</h1>
+                <h1>FPL konken 19/20</h1>
                 {contents}
             </div>
         );
