@@ -27,7 +27,7 @@ namespace web.Models.View
 		public int OverallPoints { get; set; }
 		public int Transfers { get; set; }
 		public int TransferCosts { get; set; }
-		public Chip Chip { get; set; }
+		public string Chip { get; set; }
 		public double Value { get; set; }
 		public int GameweekRank { get; set; }
 		public int OverallRank { get; set; }
@@ -55,7 +55,7 @@ namespace web.Models.View
 		public int OverallPoints { get; set; }
 		public int Transfers { get; set; }
 		public int TransferCosts { get; set; }
-		public Chip Chip { get; set; }
+		public string Chip { get; set; }
 		public double Value { get; set; }
 		public int GameweekRank { get; set; }
 		public int OverallRank { get; set; }
@@ -80,16 +80,16 @@ namespace web.Models.View
 	//	public int ScoredGoals { get; set; }
 	//}
 
-	[JsonConverter(typeof(StringEnumConverter))]
-	public enum Chip
-	{
-		None = 0,
-		Wildcard = 1,
-		AllOutAttack = 2,
-		BenchBoost = 3,
-		TripleCaptain = 4,
-		Wildcard2 = 5
-	}
+//	[JsonConverter(typeof(StringEnumConverter))]
+//	public enum Chip
+//	{
+//		None = 0,
+//		Wildcard = 1,
+//		AllOutAttack = 2,
+//		BenchBoost = 3,
+//		TripleCaptain = 4,
+//		Wildcard2 = 5
+//	}
 
 	public class Cup
 	{
@@ -121,7 +121,7 @@ namespace web.Models.View
 		public int Transfers { get; set; }
 		public int TransferCosts { get; set; }
 		public int PointsTransferCostsExcluded { get; set; }
-		public List<Chip> Chips { get; set; }
+		public List<string> Chips { get; set; }
 		public double Value { get; set; }
 		public int Rank { get; set; }
 		public double Cash { get; set; }

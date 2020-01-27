@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Services;
 using web.Models.Data;
+using web.Models.View;
 using web.Settings;
+using LeagueStanding = web.Models.Data.LeagueStanding;
 
 namespace web.Controllers
 {
@@ -33,15 +36,52 @@ namespace web.Controllers
         [HttpGet("league")]
         public async Task<IActionResult> GetLeague()
         {
-            LeagueStanding league = await _fplApiWrapper.GetLeagueStanding(_appSettings.LeagueId);
-
-            List<TeamHistory> teamHistories = new List<TeamHistory>();
-            foreach (var standing in league.standings.results)
-            {
-                teamHistories.Add(await _fplApiWrapper.GetTeamHistory(standing.entry.ToString()));
-            }
+            LeagueStanding leagueData = await _fplApiWrapper.GetLeagueStanding(_appSettings.LeagueId);
             
-            return Ok(new {league, teamHistories});
+            Models.View.League league = new Models.View.League()
+            {
+                FplLeagueId = leagueData.league.id.ToString(),
+                Name = leagueData.league.name,
+                Players = new List<Player>()
+            };
+            
+            foreach (var standing in leagueData.standings.results)
+            {
+                Player player = new Player
+                {
+                    Name = standing.player_name,
+                    TeamName = standing.entry_name,
+                    FplPlayerId = standing.entry.ToString(),
+                    Gameweeks = new List<Gameweek>()
+                };
+
+                TeamHistory teamHistory = await _fplApiWrapper.GetTeamHistory(standing.entry.ToString());
+
+                foreach (var gw in teamHistory.current)
+                {
+                    player.Gameweeks.Add(new Gameweek()
+                    {
+                        Number = gw.@event,
+                        Points = gw.points,
+                        PointsOnBench = gw.points_on_bench,
+                        GameweekRank = gw.rank,
+                        Transfers = gw.event_transfers,
+                        TransferCosts = gw.event_transfers_cost,
+                        OverallPoints = gw.total_points,
+                        OverallRank = gw.overall_rank,
+                        Value = gw.value
+                    });
+                }
+
+                foreach (var chip in teamHistory.chips)
+                {
+                    player.Gameweeks.First(x => x.Number == chip.@event).Chip = chip.name;
+                }
+                
+                league.Players.Add(player);
+            }
+
+            return Ok(league);
         }
     }
 }

@@ -25,7 +25,7 @@ export class Home extends Component {
     }
 
     static renderLeague(league) {
-        if (!league.teamHistories) {
+        if (!league.Players) {
             return <div>tomt</div>;
         }
 
@@ -33,19 +33,15 @@ export class Home extends Component {
             <table className='table table-striped'>
                 <thead>
                 <tr>
-                    <th/>
                     <th>Navn</th>
                     <th>Lag</th>
-                    <th>Poeng</th>
                 </tr>
                 </thead>
                 <tbody>
-                {league.teamHistories.map(gw =>
-                    <tr key={gw.event}>
-                        <td>{gw.event}</td>
-                        <td>{league.Id}</td>
-                        <td>{league.Id}</td>
-                        <td>{league.Id}</td>
+                {league.Players.map(player =>
+                    <tr key={player.FplPlayerId}>
+                        <td>{player.Name}</td>
+                        <td>{player.TeamName}</td>
                     </tr>
                 )}
                 </tbody>
