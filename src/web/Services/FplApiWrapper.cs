@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using web;
 using web.Models.Data;
@@ -17,65 +18,86 @@ namespace Services
 
         private CookieContainer _cookieContainer = new CookieContainer();
 
-        public FplApiWrapper(IHttpClientFactory httpClientFactory, string settingsLeagueId)
+        private IMemoryCache _cache;
+
+        public FplApiWrapper(IHttpClientFactory httpClientFactory, IMemoryCache memoryCache, string settingsLeagueId)
         {
             _httpClientFactory = httpClientFactory;
+            _cache = memoryCache;
         }
 
         private async Task Login()
         {
-            using (var handler = new HttpClientHandler() {CookieContainer = _cookieContainer})
+            if (!_cache.TryGetValue(CacheKeys.Login, out CookieContainer cookieContainer))
             {
-                using (var client = new HttpClient(handler))
+                using (var handler = new HttpClientHandler())
                 {
-                    client.BaseAddress = new Uri("https://users.premierleague.com/accounts/login/");
-
-                    /*                     
-                     request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
-request.AddParameter("password", "fhkpc3");
-request.AddParameter("login", "espenhal@hotmail.com");
-request.AddParameter("redirect_uri", "https://fantasy.premierleague.com/a/login");
-request.AddParameter("app", "plfpl-web");
-                     */
-
-                    HttpContent httpContent = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>()
+                    using (var client = new HttpClient(handler))
                     {
-                        new KeyValuePair<string, string>("password", "fhkpc3"),
-                        new KeyValuePair<string, string>("login", "espenhal@hotmail.com"),
-                        new KeyValuePair<string, string>("redirect_uri", "https://fantasy.premierleague.com/a/login"),
-                        new KeyValuePair<string, string>("app", "plfpl-web")
-                    });
+                        client.BaseAddress = new Uri("https://users.premierleague.com/accounts/login/");
 
-                    using (var response = await client.PostAsync("", httpContent))
-                    {
-                        var result = await response.Content.ReadAsStringAsync();
+                        /*                     
+                         request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
+    request.AddParameter("password", "fhkpc3");
+    request.AddParameter("login", "espenhal@hotmail.com");
+    request.AddParameter("redirect_uri", "https://fantasy.premierleague.com/a/login");
+    request.AddParameter("app", "plfpl-web");
+                         */
 
-                        CookieCollection cookies =
-                            handler.CookieContainer.GetCookies(new Uri("https://users.premierleague.com"));
+                        HttpContent httpContent = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>()
+                        {
+                            new KeyValuePair<string, string>("password", "fhkpc3"),
+                            new KeyValuePair<string, string>("login", "espenhal@hotmail.com"),
+                            new KeyValuePair<string, string>("redirect_uri",
+                                "https://fantasy.premierleague.com/a/login"),
+                            new KeyValuePair<string, string>("app", "plfpl-web")
+                        });
 
-                        _cookieContainer = handler.CookieContainer;
+                        using (var response = await client.PostAsync("", httpContent))
+                        {
+                            var result = await response.Content.ReadAsStringAsync();
+
+                            CookieCollection cookies =
+                                handler.CookieContainer.GetCookies(new Uri("https://users.premierleague.com"));
+
+                            cookieContainer = handler.CookieContainer;
+                            
+                            var cacheEntryOptions = new MemoryCacheEntryOptions
+                            {
+                                AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(24)
+                            };
+
+                            _cache.Set(CacheKeys.Login, cookieContainer, cacheEntryOptions);
+                        }
                     }
                 }
             }
+
+            _cookieContainer = cookieContainer;
         }
 
         public async Task<string> GetBootstrap()
         {
-            using (var handler = new HttpClientHandler() {CookieContainer = _cookieContainer})
+            if (!_cache.TryGetValue(CacheKeys.Bootstrap, out string bootstrap))
             {
-                using (var client = new HttpClient(handler))
+                using (var handler = new HttpClientHandler())
                 {
-                    client.BaseAddress = new Uri("https://fantasy.premierleague.com/api/");
-
-                    using (var response = await client.GetAsync("bootstrap-static"))
+                    using (var client = new HttpClient(handler))
                     {
-                        return await response.Content.ReadAsStringAsync();
+                        client.BaseAddress = new Uri("https://fantasy.premierleague.com/api/");
+
+                        using (var response = await client.GetAsync("bootstrap-static"))
+                        {
+                            bootstrap = await response.Content.ReadAsStringAsync();
+                        }
                     }
                 }
             }
+
+            return bootstrap;
         }
 
-        public async Task<LeagueStanding> GetLeague(string leagueId)
+        public async Task<LeagueStanding> GetLeagueStanding(string leagueId)
         {
             await Login();
 
@@ -87,13 +109,14 @@ request.AddParameter("app", "plfpl-web");
 
                     using (var response = await client.GetAsync($"leagues-classic/{leagueId}/standings"))
                     {
-                        return JsonConvert.DeserializeObject<LeagueStanding>(await response.Content.ReadAsStringAsync());
+                        return JsonConvert.DeserializeObject<LeagueStanding>(
+                            await response.Content.ReadAsStringAsync());
                     }
                 }
             }
         }
 
-        public async Task<TeamHistory> GetTeam(string teamId)
+        public async Task<TeamHistory> GetTeamHistory(string teamId)
         {
             await Login();
 
@@ -106,18 +129,18 @@ request.AddParameter("app", "plfpl-web");
                     using (var response = await client.GetAsync($"entry/{teamId}/history/"))
                     {
                         var result = await response.Content.ReadAsStringAsync();
-                        
+
                         return JsonConvert.DeserializeObject<TeamHistory>(result);
                     }
                 }
-            }   
+            }
         }
     }
 
     public interface IFplApiWrapper
     {
         Task<string> GetBootstrap();
-        Task<LeagueStanding> GetLeague(string leagueId);
-        Task<TeamHistory> GetTeam(string teamId);
+        Task<LeagueStanding> GetLeagueStanding(string leagueId);
+        Task<TeamHistory> GetTeamHistory(string teamId);
     }
 }

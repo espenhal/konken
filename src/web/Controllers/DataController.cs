@@ -11,12 +11,12 @@ namespace web.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class LeagueController : Controller
+    public class DataController : Controller
     {
         private readonly IFplApiWrapper _fplApiWrapper;
         private readonly AppSettings _appSettings;
 
-        public LeagueController(IFplApiWrapper fplApiWrapper, AppSettings appSettings)
+        public DataController(IFplApiWrapper fplApiWrapper, AppSettings appSettings)
         {
             _fplApiWrapper = fplApiWrapper;
             _appSettings = appSettings;
@@ -30,19 +30,18 @@ namespace web.Controllers
             return Ok(league);
         }
 
-        [HttpGet]
+        [HttpGet("league")]
         public async Task<IActionResult> GetLeague()
         {
-            var leagueId = _appSettings.LeagueId;
-            var league = await _fplApiWrapper.GetLeague(leagueId);
+            LeagueStanding league = await _fplApiWrapper.GetLeagueStanding(_appSettings.LeagueId);
 
             List<TeamHistory> teamHistories = new List<TeamHistory>();
             foreach (var standing in league.standings.results)
             {
-                teamHistories.Add(await _fplApiWrapper.GetTeam(standing.entry.ToString()));
+                teamHistories.Add(await _fplApiWrapper.GetTeamHistory(standing.entry.ToString()));
             }
             
-            return Ok(new { league, teamHistories});
+            return Ok(new {league, teamHistories});
         }
     }
 }

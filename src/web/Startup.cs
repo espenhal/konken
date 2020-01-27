@@ -33,6 +33,7 @@ namespace web
             _settings = Configuration.Get<AppSettings>();
 
             services
+                .AddMemoryCache()
                 .AddSingleton<AppSettings>(_settings)
                 .AddFplService(_settings);
 

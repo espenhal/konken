@@ -17,6 +17,9 @@
   <ItemGroup>
     <!-- Don't publish the SPA source files, but do show them in the project files list -->
     <Content Remove="$(SpaRoot)**" />
+    <Content Include="ClientApp\src\pages\errors\PageNotFound.js" />
+    <Content Include="ClientApp\src\pages\Home.js" />
+    <Content Include="ClientApp\src\services\LeagueService.js" />
     <None Remove="$(SpaRoot)**" />
     <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
   </ItemGroup>

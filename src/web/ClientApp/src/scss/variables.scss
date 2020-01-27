@@ -1,0 +1,39 @@
+// Colors
+$color-white: #FFFFFF;
+$color-light-grey: #aaa8a8;
+$color-grey: #737373;
+$color-dark-grey: #333333;
+$color-black: #06162D;
+$color-blue: #1f68d7;
+$color-bright-orange: #F39237;
+$color-orange: #ee6c00;
+$color-red: #B81221;
+$color-bright-red: #D63230;
+$color-green: #008377;
+
+$font-size-sm: 14px;
+$font-size-base: 16px;
+$font-size-lg: 18px;
+$font-size-xl: 24px;
+$font-size-xxl: 34px;
+
+$line-height-sm: 16px;
+$line-height-base: 20px;
+$line-height-lg: 32px;
+$line-height-xl: 32px;
+
+$font-weight-light: 300;
+$font-weight-regular: 400;
+$font-weight-medium: 500;
+$font-weight-bold: 700;
+
+$grid-breakpoints: (
+        md: 599px, // iPhone
+        lg: 664px, // iPad
+        xl: 664px // Desktop
+);
+
+$border-width: 2px;
+$border-radius: 4px;
+
+$font-family-regular: 'Roboto', sans-serif;
