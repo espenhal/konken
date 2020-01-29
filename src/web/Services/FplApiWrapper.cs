@@ -61,7 +61,7 @@ namespace Services
                                 handler.CookieContainer.GetCookies(new Uri("https://users.premierleague.com"));
 
                             cookieContainer = handler.CookieContainer;
-                            
+
                             var cacheEntryOptions = new MemoryCacheEntryOptions
                             {
                                 AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(24)
@@ -76,25 +76,20 @@ namespace Services
             _cookieContainer = cookieContainer;
         }
 
-        public async Task<string> GetBootstrap()
+        public async Task<Bootstrap> GetBootstrap()
         {
-            if (!_cache.TryGetValue(CacheKeys.Bootstrap, out string bootstrap))
+            using (var handler = new HttpClientHandler())
             {
-                using (var handler = new HttpClientHandler())
+                using (var client = new HttpClient(handler))
                 {
-                    using (var client = new HttpClient(handler))
-                    {
-                        client.BaseAddress = new Uri("https://fantasy.premierleague.com/api/");
+                    client.BaseAddress = new Uri("https://fantasy.premierleague.com/api/");
 
-                        using (var response = await client.GetAsync("bootstrap-static"))
-                        {
-                            bootstrap = await response.Content.ReadAsStringAsync();
-                        }
+                    using (var response = await client.GetAsync("bootstrap-static"))
+                    {
+                        return JsonConvert.DeserializeObject<Bootstrap>(await response.Content.ReadAsStringAsync());
                     }
                 }
             }
-
-            return bootstrap;
         }
 
         public async Task<LeagueStanding> GetLeagueStanding(string leagueId)
@@ -128,9 +123,7 @@ namespace Services
 
                     using (var response = await client.GetAsync($"entry/{teamId}/history/"))
                     {
-                        var result = await response.Content.ReadAsStringAsync();
-
-                        return JsonConvert.DeserializeObject<TeamHistory>(result);
+                        return JsonConvert.DeserializeObject<TeamHistory>(await response.Content.ReadAsStringAsync());
                     }
                 }
             }
@@ -139,7 +132,7 @@ namespace Services
 
     public interface IFplApiWrapper
     {
-        Task<string> GetBootstrap();
+        Task<Bootstrap> GetBootstrap();
         Task<LeagueStanding> GetLeagueStanding(string leagueId);
         Task<TeamHistory> GetTeamHistory(string teamId);
     }

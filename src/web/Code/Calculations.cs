@@ -7,34 +7,59 @@ namespace web.Code
 {
     public class Calculations
     {
-        public async Task<League> CalculateLeague(string fplLeagueId, int? round = null)
+        public League CalculateLeagueStandings(League league)
         {
-            return new League();
-//            //fetch league
-//            League league = 
-//
-//            if (league != null)
-//            {
-//                //fetch players
-//
-//                //fetch gameweeks
-//
-//                league.Players = ;
-//
-//                foreach (var player in league.Players)
-//                {
-//                    player.Gameweeks =
-//                        Mapper.Map<List<GameweekEntity>, List<Gameweek>>(
-//                            gameweeksEntities.Results.Where(
-//                                x => x.FplLeagueId == fplLeagueId && x.FplPlayerId == player.FplPlayerId).ToList());
-//
-//                    if (round == null)
-//                        round = player.Gameweeks.Count;
-//
-//                    player.Gameweeks = player.Gameweeks.Where(x => x.Number <= round).OrderBy(x => x.Number).ToList();
-//                }
-//            }
-//            return league;
+            return null;
         }
+        
+//        public LeagueGameweek CalculateLeagueGameweek(LeagueGameweek leagueGameweek)
+//        {
+//            
+//        }
+//        
+//        public League CalculateLeague()
+//        {
+//            League league = 
+//        }
+//
+//        public League CalculateLeague()
+//        {
+//            
+//        }
+//
+//        public LeagueStanding CalculateLeagueStanding()
+//        {
+//            
+//        }
+//
+//        public double CalculateGameweekWinnerCash(Player player, League league)
+//        {
+//            
+//        }
+//
+//        public void CalculateEndOfSeasonCash(LeagueStanding leagueStanding, League league)
+//        {
+//            
+//        }
+//
+//        public void CalculateMostValuableCash(LeagueStanding leagueStanding, League league)
+//        {
+//            
+//        }
+//
+//        public void CalculateCupCash(LeagueStanding leagueStanding, League league)
+//        {
+//            
+//        }
+//
+//        public List<int> CalculatePlayerGameweekWinners(Player player, League league)
+//        {
+//            
+//        }
+//
+//        public List<GameweekWinner> CalculateGameweekWinners(League league)
+//        {
+//            
+//        }
     }
 }

@@ -28,14 +28,18 @@ namespace web.Controllers
         [HttpGet("bootstrap")]
         public async Task<IActionResult> GetBootstrap()
         {
-            var league = await _fplApiWrapper.GetBootstrap();
+            Bootstrap bootstrap = await _fplApiWrapper.GetBootstrap();
 
-            return Ok(league);
+            return Ok(bootstrap);
         }
 
         [HttpGet("league")]
         public async Task<IActionResult> GetLeague()
         {
+            Bootstrap bootstrap = await _fplApiWrapper.GetBootstrap();
+
+            int gameWeekCount = bootstrap.events.Count;
+            
             LeagueStanding leagueData = await _fplApiWrapper.GetLeagueStanding(_appSettings.LeagueId);
             
             Models.View.League league = new Models.View.League()
@@ -57,6 +61,8 @@ namespace web.Controllers
 
                 TeamHistory teamHistory = await _fplApiWrapper.GetTeamHistory(standing.entry.ToString());
 
+                //todo: get scored goals to decide a tie-breaker
+                
                 foreach (var gw in teamHistory.current)
                 {
                     player.Gameweeks.Add(new Gameweek()
@@ -77,6 +83,8 @@ namespace web.Controllers
                 {
                     player.Gameweeks.First(x => x.Number == chip.@event).Chip = chip.name;
                 }
+                
+                //todo: get cup
                 
                 league.Players.Add(player);
             }
