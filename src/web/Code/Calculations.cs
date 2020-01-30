@@ -11,7 +11,6 @@ namespace web.Code
         private const double WinnerSum = 212.5;
         private const double MostValuableWinnerSum = 62.5;
         private const double LongestRunInCupSum = 62.5;
-        private const double HalfWayWinnerSum = 62.5;
         
         public static List<PlayerStanding> CalculateLeagueStandings(League league)
         {
