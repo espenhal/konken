@@ -5,7 +5,7 @@ export class Home extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {league: {}, loading: true};
+        this.state = {players: {}, loading: true};
 
         function handleErrors(response) {
             if (!response.ok) {
@@ -19,13 +19,13 @@ export class Home extends Component {
             .then(response => response.json())
             .then(data => {
                 console.log(data)
-                this.setState({league: data, loading: false});
+                this.setState({players: data, loading: false});
             })
             .catch(error => console.error(error));
     }
 
-    static renderLeague(league) {
-        if (!league.Players) {
+    static renderLeague(players) {
+        if (!players) {
             return <div>tomt</div>;
         }
 
@@ -33,15 +33,33 @@ export class Home extends Component {
             <table className='table table-striped'>
                 <thead>
                 <tr>
-                    <th>Navn</th>
                     <th>Lag</th>
+                    <th className='points'>KONKEN</th>
+                    <th>$$$Gevinst</th>
+                    <th>Rundeseire</th>
+                    <th>Cup</th>
+                    <th>$</th>
+                    <th>Poing</th>
+                    <th>Benkpoing</th>
+                    <th>Bytter</th>
+                    <th>Byttekost</th>                    
+                    <th>Chips</th>
                 </tr>
                 </thead>
                 <tbody>
-                {league.Players.map(player =>
+                {players.map(player =>
                     <tr key={player.FplPlayerId}>
-                        <td>{player.Name}</td>
-                        <td>{player.TeamName}</td>
+                        <td>{player.TeamName} ({player.Name})</td>
+                        <td className='points'>{player.PointsTransferCostsExcluded}</td>                        
+                        <td>{player.Cash}</td>
+                        <td>{player.GameweeksWon}</td>
+                        <td>{player.CupRounds}</td>
+                        <td>{player.Value}</td>
+                        <td>{player.Points}</td>
+                        <td>{player.PointsOnBench}</td>
+                        <td>{player.Transfers}</td>
+                        <td>{player.TransferCosts}</td>
+                        <td>{player.Chips}</td>
                     </tr>
                 )}
                 </tbody>
@@ -52,7 +70,7 @@ export class Home extends Component {
     render() {
         let contents = this.state.loading
             ? <p><em>Loading...</em></p>
-            : Home.renderLeague(this.state.league);
+            : Home.renderLeague(this.state.players);
 
         return (
             <div>

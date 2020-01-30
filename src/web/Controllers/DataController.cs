@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Services;
+using web.Code;
 using web.Models.Data;
 using web.Models.View;
 using web.Settings;
@@ -83,13 +84,32 @@ namespace web.Controllers
                 {
                     player.Gameweeks.First(x => x.Number == chip.@event).Chip = chip.name;
                 }
-                
-                //todo: get cup
+
+                Models.Data.Cup cup = await _fplApiWrapper.GetCup(standing.entry.ToString());
+
+                foreach (var cupMatch in cup.cup_matches)
+                {
+                    player.Gameweeks.First(x => x.Number == cupMatch.@event).Cup = new Models.View.Cup()
+                    {
+                        HomeFplPlayerId = cupMatch.entry_1_entry.ToString(),
+                        HomeName = cupMatch.entry_1_player_name,
+                        HomeTeamName = cupMatch.entry_1_name,
+                        HomePoints = cupMatch.entry_1_points,
+                        AwayFplPlayerId = cupMatch.entry_2_entry.ToString(),
+                        AwayName = cupMatch.entry_2_player_name,
+                        AwayTeamName = cupMatch.entry_2_name,
+                        AwayPoints = cupMatch.entry_2_points,
+                        GameweekNumber = cupMatch.@event,
+                        Winner = cupMatch.winner
+                    };
+                }
                 
                 league.Players.Add(player);
             }
 
-            return Ok(league);
+            List<PlayerStanding> playerStandings = Calculations.CalculateLeagueStandings(league);
+            
+            return Ok(playerStandings.OrderByDescending(x => x.PointsTransferCostsExcluded));
         }
     }
 }

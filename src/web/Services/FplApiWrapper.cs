@@ -78,16 +78,13 @@ namespace Services
 
         public async Task<Bootstrap> GetBootstrap()
         {
-            using (var handler = new HttpClientHandler())
+            using (var client = new HttpClient())
             {
-                using (var client = new HttpClient(handler))
-                {
-                    client.BaseAddress = new Uri("https://fantasy.premierleague.com/api/");
+                client.BaseAddress = new Uri("https://fantasy.premierleague.com/api/");
 
-                    using (var response = await client.GetAsync("bootstrap-static"))
-                    {
-                        return JsonConvert.DeserializeObject<Bootstrap>(await response.Content.ReadAsStringAsync());
-                    }
+                using (var response = await client.GetAsync("bootstrap-static/"))
+                {
+                    return JsonConvert.DeserializeObject<Bootstrap>(await response.Content.ReadAsStringAsync());
                 }
             }
         }
@@ -128,6 +125,42 @@ namespace Services
                 }
             }
         }
+
+        public async Task<TeamEntry> GetTeam(string teamId)
+        {
+            await Login();
+
+            using (var handler = new HttpClientHandler() {CookieContainer = _cookieContainer})
+            {
+                using (var client = new HttpClient(handler))
+                {
+                    client.BaseAddress = new Uri("https://fantasy.premierleague.com/api/");
+
+                    using (var response = await client.GetAsync($"entry/{teamId}/"))
+                    {
+                        return JsonConvert.DeserializeObject<TeamEntry>(await response.Content.ReadAsStringAsync());
+                    }
+                }
+            }
+        }
+
+        public async Task<Cup> GetCup(string teamId)
+        {
+            await Login();
+
+            using (var handler = new HttpClientHandler() {CookieContainer = _cookieContainer})
+            {
+                using (var client = new HttpClient(handler))
+                {
+                    client.BaseAddress = new Uri("https://fantasy.premierleague.com/api/");
+
+                    using (var response = await client.GetAsync($"entry/{teamId}/cup/"))
+                    {
+                        return JsonConvert.DeserializeObject<Cup>(await response.Content.ReadAsStringAsync());
+                    }
+                }
+            }
+        }
     }
 
     public interface IFplApiWrapper
@@ -135,5 +168,7 @@ namespace Services
         Task<Bootstrap> GetBootstrap();
         Task<LeagueStanding> GetLeagueStanding(string leagueId);
         Task<TeamHistory> GetTeamHistory(string teamId);
+        Task<TeamEntry> GetTeam(string teamId);
+        Task<Cup> GetCup(string teamId);
     }
 }
