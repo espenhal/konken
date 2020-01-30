@@ -82,7 +82,7 @@ namespace web.Controllers
 
                 foreach (var chip in teamHistory.chips)
                 {
-                    player.Gameweeks.First(x => x.Number == chip.@event).Chip = chip.name;
+                    player.Gameweeks.First(x => x.Number == chip.@event && !string.IsNullOrWhiteSpace(chip.name)).Chip = chip.name;
                 }
 
                 Models.Data.Cup cup = await _fplApiWrapper.GetCup(standing.entry.ToString());
