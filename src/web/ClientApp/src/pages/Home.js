@@ -62,8 +62,8 @@ export class Home extends Component {
                         <td>{player.PointsOnBench}</td>
                         <td>{player.Transfers}</td>
                         <td>{player.TransferCosts}</td>
-                        <td>{player.Chips.map((ch, i) => [
-                            i > 0 && ", ",
+                        <td>{player.Chips.filter(Boolean).map((ch, i) => [
+                            (i > 0 && ch !== "") && ", ",
                             <span key={i}>{ch}</span>
                         ])}</td>
                     </tr>
