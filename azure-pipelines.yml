@@ -15,6 +15,7 @@ variables:
 steps:
 
 - task: DotNetCoreCLI@2
+  displayName: 'dotnet build $(buildConfiguration)'
   inputs:
     command: 'build'
     projects: '**/*.csproj'
@@ -28,10 +29,12 @@ steps:
 #     arguments: '--configuration $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
+  displayName: 'dotnet publish $(buildConfiguration)'
   inputs:
     command: 'publish'
     publishWebProjects: true
     arguments: '--configuration $(BuildConfiguration)'
+    zipAfterPublish: True
 
 # - task: DotNetCoreCLI@2
 #   displayName: 'dotnet publish $(buildConfiguration) to $(Build.ArtifactStagingDirectory)'
@@ -41,7 +44,14 @@ steps:
 #     arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
 #     zipAfterPublish: True
 
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+
 - task: AzureWebApp@1
+  displayName: 'deploy azure web app konken from package $(System.DefaultWorkingDirectory)/**/*.zip'
   inputs:
     azureSubscription: 'BetalForForbruk'
     appType: 'webApp'
