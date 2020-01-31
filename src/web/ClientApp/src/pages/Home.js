@@ -34,15 +34,15 @@ export class Home extends Component {
                 <thead>
                 <tr>
                     <th>Lag</th>
-                    <th className='points'>KONKEN</th>
+                    <th className='points'>Poeng</th>
                     <th className='cash'>Gevinst</th>
                     <th>Seiere</th>
                     <th>Cup</th>
                     <th>$</th>
-                    <th>Poing</th>
-                    <th>Benkpoing</th>
                     <th>Bytter</th>
                     <th>Byttekost</th>
+                    <th>Poeng totalt</th>
+                    <th>(Benkpoeng)</th>
                     <th>Chips</th>
                 </tr>
                 </thead>
@@ -50,7 +50,7 @@ export class Home extends Component {
                 {players.map(player =>
                     <tr key={player.FplPlayerId}>
                         <td><strong>{player.TeamName}</strong><br/><small>{player.Name}</small></td>
-                        <td className='points'>{player.PointsTransferCostsExcluded}</td>
+                        <td className='points'>{player.Points}</td>
                         <td className='cash'>{player.Cash}</td>
                         <td>{player.GameweeksWon.map((gw, i) => [
                             i > 0 && ", ",
@@ -58,10 +58,10 @@ export class Home extends Component {
                         ])}</td>
                         <td>{player.CupRounds}</td>
                         <td>{player.Value}</td>
-                        <td>{player.Points}</td>
-                        <td>{player.PointsOnBench}</td>
                         <td>{player.Transfers}</td>
                         <td>{player.TransferCosts}</td>
+                        <td>{player.PointsTransferCostsExcluded}</td>
+                        <td>({player.PointsOnBench})</td>
                         <td>{player.Chips.filter(Boolean).map((ch, i) => [
                             (i > 0 && ch !== "") && ", ",
                             <span key={i}>{ch}</span>
