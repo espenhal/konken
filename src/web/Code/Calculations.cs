@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using web.Models.View;
@@ -30,7 +31,7 @@ namespace web.Code
                     TransferCosts = player.Gameweeks.Sum(x => x.TransferCosts),
                     PointsTransferCostsExcluded = player.Gameweeks.Sum(x => x.Points), // total med fratrekk for bytter
                     Chips = player.Gameweeks.Select(x => x.Chip).ToList(),
-                    Value = player.Gameweeks.OrderBy(x => x.Number).Last().Value,
+                    Value = ConvertValueToDouble(player.Gameweeks.OrderBy(x => x.Number).Last().Value),
                     Rank = player.Gameweeks.OrderBy(x => x.Number).Last().OverallRank,
                     Cash = CalculateGameweekWinnerCash(player, league),
                     GameweeksWon = CalculatePlayerGameweekWinners(player, league),
@@ -47,6 +48,11 @@ namespace web.Code
             CalculateMostValuableCash(playerStandings, league);
             
             return playerStandings;
+        }
+
+        private static double ConvertValueToDouble(double value)
+        {
+            return double.Parse(value.ToString(CultureInfo.InvariantCulture).Insert(3, ","));
         }
         
         private static double CalculateGameweekWinnerCash(Player player, League league)
