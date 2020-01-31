@@ -13,20 +13,33 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
-- task: DotNetCoreCLI@2
-  displayName: 'dotnet build $(buildConfiguration)'
-  inputs:
-    command: build
-    projects: '**/*.csproj'
-    arguments: '--configuration $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
-  displayName: 'dotnet publish $(buildConfiguration) to $(Build.ArtifactStagingDirectory)'
   inputs:
-    command: publish
-    publishWebProjects: True
-    arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
-    zipAfterPublish: True
+    command: 'build'
+    projects: '**/*.csproj'
+    arguments: '--configuration $(BuildConfiguration)'
+
+# - task: DotNetCoreCLI@2
+#   displayName: 'dotnet build $(buildConfiguration)'
+#   inputs:
+#     command: build
+#     projects: '**/*.csproj'
+#     arguments: '--configuration $(buildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'publish'
+    publishWebProjects: true
+    arguments: '--configuration $(BuildConfiguration)'
+
+# - task: DotNetCoreCLI@2
+#   displayName: 'dotnet publish $(buildConfiguration) to $(Build.ArtifactStagingDirectory)'
+#   inputs:
+#     command: publish
+#     publishWebProjects: True
+#     arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+#     zipAfterPublish: True
 
 - task: AzureWebApp@1
   inputs:
