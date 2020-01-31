@@ -34,4 +34,4 @@ steps:
     azureSubscription: 'BetalForForbruk'
     appName: 'konken'
     appType: webApp
-    package: $(System.ArtifactsDirectory)/**/*.zip
+    package: '**/*.zip'
