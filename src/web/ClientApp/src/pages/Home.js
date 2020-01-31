@@ -33,7 +33,7 @@ export class Home extends Component {
             <table className='table table-striped'>
                 <thead>
                 <tr>
-                    <th>Lag</th>
+                    <th><small>(Ranking)</small> Lag</th>
                     <th className='points'>Poeng</th>
                     <th className='cash'>Gevinst</th>
                     <th>Seiere</th>
@@ -49,7 +49,7 @@ export class Home extends Component {
                 <tbody>
                 {players.map(player =>
                     <tr key={player.FplPlayerId}>
-                        <td><strong>{player.TeamName}</strong><br/><small>{player.Name}</small></td>
+                        <td><small>({player.Rank})</small> <strong>{player.TeamName}</strong> <small>{player.Name}</small></td>
                         <td className='points'>{player.Points}</td>
                         <td className='cash'>{player.Cash}</td>
                         <td>{player.GameweeksWon.map((gw, i) => [
