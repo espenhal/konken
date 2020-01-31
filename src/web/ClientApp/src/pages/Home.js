@@ -26,7 +26,7 @@ export class Home extends Component {
 
     static renderLeague(players) {
         if (!players) {
-            return <div>tomt</div>;
+            return <div>Noe gikk galt</div>;
         }
 
         return (

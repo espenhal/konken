@@ -50,9 +50,16 @@ namespace web.Code
             return playerStandings;
         }
 
-        private static double ConvertValueToDouble(double value)
+        private static string ConvertValueToDouble(double value)
         {
-            return double.Parse(value.ToString(CultureInfo.InvariantCulture).Insert(3, ","));
+            try
+            {
+                return double.Parse(value.ToString(CultureInfo.InvariantCulture).Insert(3, ",")).ToString(CultureInfo.InvariantCulture);
+            }
+            catch
+            {
+                return value.ToString(CultureInfo.InvariantCulture);
+            }
         }
         
         private static double CalculateGameweekWinnerCash(Player player, League league)

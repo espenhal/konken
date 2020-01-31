@@ -61,7 +61,7 @@ namespace web.Models.View
         public int TransferCosts { get; set; }
         public int PointsTransferCostsExcluded { get; set; }
         public List<string> Chips { get; set; }
-        public double Value { get; set; }
+        public string Value { get; set; }
         public int Rank { get; set; }
         public double Cash { get; set; }
         public List<int> GameweeksWon { get; set; }
