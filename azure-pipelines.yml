@@ -32,6 +32,6 @@ steps:
   displayName: 'deploy azure web app konken'
   inputs:
     azureSubscription: 'BetalForForbruk'
-    appType: 'webApp'
     appName: 'konken'
-    package: '$(System.DefaultWorkingDirectory)/**/*.zip'
+    appType: webApp
+    package: '**/*.zip'
