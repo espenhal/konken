@@ -29,9 +29,17 @@ steps:
     zipAfterPublish: True
 
 - task: AzureWebApp@1
-  displayName: 'deploy azure web app konken'
   inputs:
     azureSubscription: 'BetalForForbruk'
+    appType: 'webApp'
     appName: 'konken'
-    appType: webApp
-    package: $(System.ArtifactStagingDirectory)/**/*.zip
+    package: '$(System.DefaultWorkingDirectory)/**/*.zip'
+    deploymentMethod: 'auto'
+
+# - task: AzureWebApp@1
+#   displayName: 'deploy azure web app konken'
+#   inputs:
+#     azureSubscription: 'BetalForForbruk'
+#     appName: 'konken'
+#     appType: webApp
+#     package: $(System.ArtifactStagingDirectory)/**/*.zip
