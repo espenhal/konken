@@ -52,15 +52,21 @@ namespace web.Code
 
         public static string ConvertValueToDouble(double value)
         {
+            var str = value.ToString(CultureInfo.InvariantCulture);
             try
             {
-                var str = value.ToString();
-                
-                return double.Parse(str.Insert(str.Length - 1, ",")).ToString();
+                return double.Parse(str.Insert(str.Length - 1, ".")).ToString(CultureInfo.InvariantCulture);
             }
             catch
             {
-                return value.ToString(CultureInfo.InvariantCulture);
+                try
+                {
+                    return double.Parse(str.Insert(str.Length - 1, ";")).ToString(CultureInfo.InvariantCulture);
+                }
+                catch
+                {
+                    return value.ToString(CultureInfo.InvariantCulture);   
+                }
             }
         }
         
