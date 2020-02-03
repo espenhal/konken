@@ -50,11 +50,13 @@ namespace web.Code
             return playerStandings;
         }
 
-        private static string ConvertValueToDouble(double value)
+        public static string ConvertValueToDouble(double value)
         {
             try
             {
-                return double.Parse(value.ToString(CultureInfo.InvariantCulture).Insert(3, ",")).ToString(CultureInfo.InvariantCulture);
+                var str = value.ToString();
+                
+                return double.Parse(str.Insert(str.Length - 1, ",")).ToString();
             }
             catch
             {
