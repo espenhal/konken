@@ -33,7 +33,7 @@ export class Home extends Component {
             <table className='table table-striped'>
                 <thead>
                 <tr>
-                    <th><small>(Ranking)</small> Lag</th>
+                    <th><small>(#)</small> Lag</th>
                     <th className='points'>Poeng</th>
                     <th className='cash'>Gevinst</th>
                     <th>Seiere</th>
