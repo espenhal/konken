@@ -61,7 +61,7 @@ namespace web.Code
             {
                 try
                 {
-                    return double.Parse(str.Insert(str.Length - 1, ";")).ToString(CultureInfo.InvariantCulture);
+                    return double.Parse(str.Insert(str.Length - 1, ",")).ToString(CultureInfo.InvariantCulture);
                 }
                 catch
                 {
