@@ -10,6 +10,7 @@ namespace web.Code
     {
         private const double GameweekWinnerSum = 25;
         private const double WinnerSum = 212.5;
+        private const double SecondPlaceSum = 62.5;
         private const double MostValuableWinnerSum = 62.5;
         private const double LongestRunInCupSum = 62.5;
         
@@ -187,8 +188,13 @@ namespace web.Code
         
         private static void CalculateEndOfSeasonCash(List<PlayerStanding> playerStandings, League league)
         {
-            if (league.Players.First().Gameweeks.Count >= 38)
-                playerStandings.Last().Cash += league.Players.Count * WinnerSum;
+            if (league.Players.First().Gameweeks.Count >= 38) {
+                var winner = playerStandings.Last();
+                
+                winner.Cash += league.Players.Count * WinnerSum;
+
+                playerStandings.Where(x => x != winner).Last().Cash += league.Players.Count * SecondPlaceSum;
+            }
         }
         
         private static void CalculateMostValuableCash(List<PlayerStanding> playerStandings, League league)
