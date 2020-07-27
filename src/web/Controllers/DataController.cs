@@ -109,7 +109,7 @@ namespace web.Controllers
 
             List<PlayerStanding> playerStandings = Calculations.CalculateLeagueStandings(league);
             
-            return Ok(playerStandings.OrderByDescending(x => x.PointsTransferCostsExcluded));
+            return Ok(playerStandings.OrderByDescending(x => x.Points));
         }
     }
 }
