@@ -1,22 +1,37 @@
 import React, { Component } from 'react';
-import { Route } from 'react-router';
-import { Layout } from './components/Layout';
-import { Home } from './components/Home';
-import { FetchData } from './components/FetchData';
-import { Counter } from './components/Counter';
-
-import './custom.css'
+import {Home} from "./pages/Home";
+import {PageNotFound} from "./pages/errors/PageNotFound";
+import {Switch, Route} from 'react-router-dom';
+import './css/app.css';
+import M from 'materialize-css';
+M.AutoInit();
 
 export default class App extends Component {
-  static displayName = App.name;
+  constructor(props) {
+    super(props);
 
-  render () {
+    this.state = {};
+  }
+
+  componentDidMount() {
+    document.body.classList.add(this.state.theme);
+  }
+
+  componentWillUnmount() {
+    let body = document.body;
+    body.classList.remove(...body.classList);
+  }
+
+  render() {
     return (
-      <Layout>
-        <Route exact path='/' component={Home} />
-        <Route path='/counter' component={Counter} />
-        <Route path='/fetch-data' component={FetchData} />
-      </Layout>
+        <Switch>
+          <Route exact path="/" title={'Home'} key={'home'}>
+            <Home
+                globalState={this.state}
+            />
+          </Route>
+          <Route component={PageNotFound}/>
+        </Switch>
     );
   }
 }

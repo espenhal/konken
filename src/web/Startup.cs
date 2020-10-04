@@ -1,15 +1,21 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using web.Settings;
+using web.Configuration;
+using Newtonsoft;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace web
 {
     public class Startup
     {
+        private AppSettings _settings;
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -20,14 +26,26 @@ namespace web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<AppSettings>(Configuration);
+            _settings = Configuration.Get<AppSettings>();
 
-            services.AddControllersWithViews();
+            services
+                .AddMemoryCache()
+                .AddSingleton<AppSettings>(_settings)
+                .AddFplService(_settings)
+                .AddControllersWithViews()
+                .AddNewtonsoftJson(o =>
+                {
+                    o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                    o.SerializerSettings.ContractResolver = new DefaultContractResolver();
+                    o.SerializerSettings.Error = (object sender, ErrorEventArgs args) =>
+                    {
+                        // handle error
+                    };
+                });
 
             // In production, the React files will be served from this directory
-            services.AddSpaStaticFiles(configuration =>
-            {
-                configuration.RootPath = "ClientApp/build";
-            });
+            services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/build"; });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
