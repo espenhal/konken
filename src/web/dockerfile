@@ -1,10 +1,24 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1
-
-COPY bin/Release/netcoreapp3.1/publish/ App/
-WORKDIR /App
-ENTRYPOINT ["dotnet", "web.dll"]
-
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.0-buster-slim AS base
+WORKDIR /app
 EXPOSE 80
+EXPOSE 443
+
+FROM mcr.microsoft.com/dotnet/core/sdk:3.0-buster AS build
+WORKDIR /src
+COPY ["netcore-angular-docker/netcore-angular-docker.csproj", "netcore-angular-docker/"]
+RUN dotnet restore "netcore-angular-docker/netcore-angular-docker.csproj"
+COPY . .
+WORKDIR "/src/netcore-angular-docker"
+RUN dotnet build "netcore-angular-docker.csproj" -c Release -o /app/build
+
+
+# FROM mcr.microsoft.com/dotnet/core/sdk:3.1
+
+# COPY bin/Release/netcoreapp3.1/publish/ App/
+# WORKDIR /App
+# ENTRYPOINT ["dotnet", "web.dll"]
+
+# EXPOSE 80
 
 # FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build-env
 # WORKDIR /app
