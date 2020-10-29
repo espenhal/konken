@@ -1,40 +1,28 @@
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.0-buster-slim AS base
+# FROM mcr.microsoft.com/dotnet/core/aspnet:3.1 AS base
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-focal-arm64v8 AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/core/sdk:3.0-buster AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
 WORKDIR /src
-COPY ["netcore-angular-docker/netcore-angular-docker.csproj", "netcore-angular-docker/"]
-RUN dotnet restore "netcore-angular-docker/netcore-angular-docker.csproj"
+COPY ["web.csproj", "./"]
+RUN dotnet restore "./web.csproj"
 COPY . .
-WORKDIR "/src/netcore-angular-docker"
-RUN dotnet build "netcore-angular-docker.csproj" -c Release -o /app/build
+WORKDIR "/src/."
+RUN dotnet build "web.csproj" -c Release -o /app/build
 
+# RUN curl -sL https://deb.nodesource.com/setup_10.x |  bash -
+# RUN apt-get install -y nodejs
 
-# FROM mcr.microsoft.com/dotnet/core/sdk:3.1
+FROM build AS publish
+RUN apt-get update -yq \
+    && apt-get install curl gnupg -yq \
+    && curl -sL https://deb.nodesource.com/setup_10.x | bash \
+    && apt-get install nodejs -yq
+RUN dotnet publish "web.csproj" -c Release -o /app/publish
 
-# COPY bin/Release/netcoreapp3.1/publish/ App/
-# WORKDIR /App
-# ENTRYPOINT ["dotnet", "web.dll"]
-
-# EXPOSE 80
-
-# FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build-env
-# WORKDIR /app
-# EXPOSE 80
-# EXPOSE 443
-
-# # Copy csproj and restore as distinct layers
-# COPY *.csproj ./
-# RUN dotnet restore
-
-# # Copy everything else and build
-# COPY . ./
-# RUN dotnet publish -c Release -o out
-
-# # Build runtime image
-# FROM mcr.microsoft.com/dotnet/core/aspnet:3.1
-# WORKDIR /app
-# COPY --from=build-env /app/out .
-# ENTRYPOINT ["dotnet", "web.dll"]
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "web.dll"]
