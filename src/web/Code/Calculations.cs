@@ -96,10 +96,6 @@ namespace web.Code
 
             for (var i = 1; i <= numberOfRounds.Value; i++)
             {
-                if (i >= 30 && i <= 38)  {
-                    continue;
-                }
-
                 GameweekWinner gameweekWinner = new GameweekWinner() {Number = i};
 
                 foreach (var player in league.Players)
