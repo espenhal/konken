@@ -50,6 +50,13 @@ namespace web.Models.View
     
     public class PlayerStanding
     {
+        public PlayerStanding()
+        {
+            Chips = new List<string>();
+            GameweeksWon = new List<int?>();
+            Winnings = new List<string>();
+        }
+        
         public string FplPlayerId { get; set; }
         public string Name { get; set; }
         public string TeamName { get; set; }
@@ -59,11 +66,12 @@ namespace web.Models.View
         public int? TransferCosts { get; set; }
         public int? PointsTransferCostsExcluded { get; set; }
         public List<string> Chips { get; set; }
-        public string Value { get; set; }
+        public double Value { get; set; }
         public int? Rank { get; set; }
         public double? Cash { get; set; }
         public List<int?> GameweeksWon { get; set; }
         public int? CupRounds { get; set; }
+        public List<string> Winnings { get; set; }
     }
 
     public class GameweekWinner

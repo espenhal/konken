@@ -31,12 +31,15 @@ namespace web.Code
                     TransferCosts = player.Gameweeks.Sum(x => x.TransferCosts),
                     PointsTransferCostsExcluded = player.Gameweeks.Sum(x => x.Points), // total med fratrekk for bytter
                     Chips = player.Gameweeks.Select(x => x.Chip).ToList(),
-                    Value = ConvertValueToDouble(player.Gameweeks.OrderBy(x => x.Number).Last().Value),
+                    Value = player.Gameweeks.OrderBy(x => x.Number).Last().Value.GetValueOrDefault(),
                     Rank = player.Gameweeks.OrderBy(x => x.Number).Last().OverallRank,
                     Cash = CalculateGameweekWinnerCash(player, league),
                     GameweeksWon = CalculatePlayerGameweekWinners(player, league),
                     CupRounds = player.Gameweeks.Count(x => x.Cup != null)
                 };
+                
+                if (playerStanding.Cash != 0)
+                    playerStanding.Winnings.Add($"Seiere: {playerStanding.Cash}");
 
                 playerStandings.Add(playerStanding);
             }
@@ -46,6 +49,11 @@ namespace web.Code
             CalculateCupCash(playerStandings, league);
             CalculateEndOfSeasonCash(playerStandings, league);
             CalculateMostValuableCash(playerStandings, league);
+
+            foreach (var playerStanding in playerStandings)
+            {
+                playerStanding.Winnings.Add($"Total: {playerStanding.Cash}");                
+            }
             
             return playerStandings;
         }
@@ -184,8 +192,15 @@ namespace web.Code
 
             foreach (var player in playersFurthestInCup)
             {
-                playerStandings.First(x => x.FplPlayerId == player).Cash +=
-                    (league.Players.Count * LongestRunInCupSum) / playersFurthestInCup.Count;
+                var p = playerStandings.FirstOrDefault(x => x.FplPlayerId == player);
+
+                if (p == null) return;
+
+                var sum = league.Players.Count * LongestRunInCupSum / playersFurthestInCup.Count;
+                
+                p.Cash += sum;
+                
+                p.Winnings.Add($"Cup: {sum}");
             }
         }
         
@@ -193,14 +208,24 @@ namespace web.Code
         {
             if (league.Players.First().Gameweeks.Count >= 38) {
                 var winner = playerStandings.Last();
-                
-                winner.Cash += league.Players.Count * WinnerSum;
 
-                playerStandings.Where(x => x != winner).Last().Cash += league.Players.Count * SecondPlaceSum;
+                var sum = league.Players.Count * WinnerSum;
+                
+                winner.Cash += sum;
+                
+                winner.Winnings.Add($"1.pl: {sum}");
+
+                var second = playerStandings.Last(x => x != winner);
+                
+                var sumtwo = league.Players.Count * SecondPlaceSum;
+                
+                second.Cash += sumtwo;
+                
+                second.Winnings.Add($"2.pl: {sumtwo}");
             }
         }
         
-        private static void CalculateMostValuableCash(List<PlayerStanding> playerStandings, League league)
+        private static void CalculateMostValuableCash(IReadOnlyCollection<PlayerStanding> playerStandings, League league)
         {
             if (league.Players.First().Gameweeks.Count < 38) return;
 
@@ -210,8 +235,13 @@ namespace web.Code
 
             foreach (var player in mostValuableSquads)
             {
-                playerStandings.First(x => x.FplPlayerId == player.FplPlayerId).Cash +=
-                    (league.Players.Count * MostValuableWinnerSum) / mostValuableSquads.Count;
+                var p = playerStandings.First(x => x.FplPlayerId == player.FplPlayerId);
+
+                var sum = (league.Players.Count * MostValuableWinnerSum) / mostValuableSquads.Count;
+                
+                p.Cash += sum;
+                
+                p.Winnings.Add($"Lagverdi: {sum}");
             }
         }
     }
